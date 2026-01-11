@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instructor Scheduler</title>
+    <style>
+        /* === CSS Reset & Base === */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* === Layout === */
+        .app-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: #1a1a2e;
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* === Sidebar (Instructor List) === */
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .instructor-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .instructor-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .instructor-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .instructor-card .availability {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .instructor-card .groups {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .instructor-card .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        /* === Group Tags === */
+        .group-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .group-tag.beginners {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .group-tag.children {
+            background: #ffe0b2;
+            color: #ef6c00;
+        }
+
+        .group-tag.adults {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        /* === Calendar Area === */
+        .calendar-area {
+            background: white;
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .calendar-nav h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        /* === Calendar Grid === */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(3, 1fr);
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .calendar-cell {
+            padding: 12px;
+            border-right: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-cell:last-child {
+            border-right: none;
+        }
+
+        .calendar-cell.header {
+            background: #f5f5f5;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .calendar-cell.date-cell {
+            background: #fafafa;
+            font-weight: 500;
+            justify-content: flex-start;
+        }
+
+        .calendar-cell.beginners-col {
+            background: #f1f8e9;
+        }
+
+        .calendar-cell.children-col {
+            background: #fff8e1;
+        }
+
+        .calendar-cell.adults-col {
+            background: #ffebee;
+        }
+
+        .calendar-cell.header.beginners-col {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .calendar-cell.header.children-col {
+            background: #ffe0b2;
+            color: #ef6c00;
+        }
+
+        .calendar-cell.header.adults-col {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .calendar-cell .assignment {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: grab;
+        }
+
+        .calendar-cell .unassigned {
+            color: #999;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .calendar-cell .cell-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .calendar-cell .cell-description {
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calendar-cell .cell-description.add-desc {
+            color: #999;
+            cursor: pointer;
+            font-style: italic;
+        }
+
+        .calendar-cell .cell-description.add-desc:hover {
+            color: #4CAF50;
+        }
+
+        /* === Merged Cells === */
+        .calendar-cell.merged-primary {
+            position: relative;
+        }
+
+        .calendar-cell.merged-primary::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: 10%;
+            bottom: 10%;
+            width: 2px;
+            background: transparent;
+        }
+
+        .calendar-cell.merged-hidden {
+            display: none;
+        }
+
+        .calendar-cell.merged-span-2 {
+            grid-column: span 2;
+        }
+
+        .calendar-cell.merged-span-3 {
+            grid-column: span 3;
+        }
+
+        .merge-badge {
+            display: inline-block;
+            background: #9c27b0;
+            color: white;
+            font-size: 0.65rem;
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-left: 4px;
+            font-weight: 500;
+        }
+
+        .merge-indicator {
+            font-size: 0.7rem;
+            color: #9c27b0;
+            font-weight: 500;
+        }
+
+        /* === Stats Table === */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .stats-table th,
+        .stats-table td {
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stats-table th {
+            background: #f5f5f5;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .stats-table th:first-child,
+        .stats-table td:first-child {
+            text-align: left;
+        }
+
+        .stats-table td.count {
+            font-weight: 500;
+        }
+
+        .stats-table td.count-zero {
+            color: #999;
+        }
+
+        .stats-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .stats-table .total-row {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .stats-table .col-beginners {
+            background: #f1f8e9;
+        }
+
+        .stats-table .col-children {
+            background: #fff8e1;
+        }
+
+        .stats-table .col-adults {
+            background: #ffebee;
+        }
+
+        .stats-summary {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .stats-summary p {
+            margin: 4px 0;
+        }
+
+        /* === Days Configuration === */
+        .days-config {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .day-checkbox:hover {
+            background: #e8f5e9;
+        }
+
+        .day-checkbox input:checked + span,
+        .day-checkbox:has(input:checked) {
+            background: #c8e6c9;
+        }
+
+        .toggle-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* === Cancelled Days === */
+        .calendar-row.cancelled {
+            opacity: 0.6;
+        }
+
+        .calendar-cell.cancelled-cell {
+            background: #f5f5f5 !important;
+            position: relative;
+        }
+
+        .calendar-cell.cancelled-cell::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #999;
+            transform: rotate(-5deg);
+        }
+
+        .cancelled-label {
+            background: #e0e0e0;
+            color: #666;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-style: italic;
+        }
+
+        .date-cell .cancel-btn {
+            opacity: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 2px 4px;
+            margin-left: 4px;
+            transition: opacity 0.2s;
+        }
+
+        .date-cell:hover .cancel-btn {
+            opacity: 1;
+        }
+
+        .date-cell .restore-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            margin-left: 6px;
+        }
+
+        /* === Buttons === */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #43a047;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-icon {
+            padding: 6px 10px;
+            background: transparent;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-icon:hover {
+            background: #f0f0f0;
+        }
+
+        /* === Modal === */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 16px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .date-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .date-picker-grid .day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #666;
+            padding: 4px;
+        }
+
+        .date-picker-grid .day-cell {
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .date-picker-grid .day-cell:hover {
+            background: #e8f5e9;
+        }
+
+        .date-picker-grid .day-cell.selected {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .date-picker-grid .day-cell.empty {
+            cursor: default;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* === Empty State === */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state p {
+            margin-bottom: 16px;
+        }
+
+        /* === Warning Toast === */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            display: none;
+            z-index: 1001;
+        }
+
+        .toast.warning {
+            background: #ff9800;
+        }
+
+        .toast.error {
+            background: #f44336;
+        }
+
+        .toast.success {
+            background: #4CAF50;
+        }
+
+        .toast.active {
+            display: block;
+        }
+    </style>    
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Instructor Scheduler</h1>
+            <div class="header-actions">
+                <button class="btn btn-icon" id="btnConfigDays" title="Configure class days">📅</button>
+                <label class="toggle-label" style="display: flex; align-items: center; gap: 6px; color: white; font-size: 0.85rem;">
+                    <input type="checkbox" id="toggleAllDays"> Show all days
+                </label>
+                <button class="btn btn-secondary" id="btnStats">📊 Stats</button>
+                <button class="btn btn-secondary" id="btnClearSchedule">🗑️ Clear</button>
+                <button class="btn btn-secondary" id="btnSave">💾 Save</button>
+                <button class="btn btn-primary" id="btnAutoGenerate">Auto-Generate Schedule</button>
+            </div>
+        </header>
+
+        <!-- Sidebar: Instructor List -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Instructors</h2>
+                <button class="btn btn-primary btn-small" id="btnAddInstructor">+ Add</button>
+            </div>
+            <div class="instructor-list" id="instructorList">
+                <div class="empty-state">
+                    <p>No instructors yet</p>
+                    <button class="btn btn-secondary btn-small" id="btnAddFirstInstructor">Add your first instructor</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Calendar Area -->
+        <main class="calendar-area">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button class="btn btn-icon" id="btnPrevMonth">&larr;</button>
+                    <h2 id="currentMonth">January 2025</h2>
+                    <button class="btn btn-icon" id="btnNextMonth">&rarr;</button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be rendered here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Instructor Modal -->
+    <div class="modal-overlay" id="instructorModal">
+        <div class="modal">
+            <h2 id="modalTitle">Add Instructor</h2>
+            <form id="instructorForm">
+                <div class="form-group">
+                    <label for="instructorName">Name</label>
+                    <input type="text" id="instructorName" required placeholder="Enter instructor name">
+                </div>
+                <div class="form-group">
+                    <label>Teachable Groups</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="groups" value="beginners"> Beginners</label>
+                        <label><input type="checkbox" name="groups" value="children"> Children</label>
+                        <label><input type="checkbox" name="groups" value="adults"> Adults</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Available Dates</label>
+                    <div class="date-picker-nav">
+                        <button type="button" class="btn btn-icon btn-small" id="btnDatePickerPrev">&larr;</button>
+                        <span id="datePickerMonth">January 2025</span>
+                        <button type="button" class="btn btn-icon btn-small" id="btnDatePickerNext">&rarr;</button>
+                    </div>
+                    <div class="date-picker-grid" id="datePickerGrid">
+                        <!-- Date picker will be rendered here -->
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="btnCancelModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveInstructor">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Class Description Modal -->
+    <div class="modal-overlay" id="descriptionModal">
+        <div class="modal">
+            <h2>Class Details</h2>
+            <form id="descriptionForm">
+                <div class="form-group">
+                    <label id="descriptionLabel">Beginners - Jan 1</label>
+                </div>
+                <div class="form-group">
+                    <label for="classDescription">Class Focus / Description</label>
+                    <textarea id="classDescription" rows="4" placeholder="What will this class cover?" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; font-family: inherit; resize: vertical;"></textarea>
+                </div>
+                <div class="form-group" id="mergeOptions" style="display: none;">
+                    <label>Merge Groups (for limited instructor days)</label>
+                    <div class="checkbox-group" style="flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <label id="mergeOption1" style="display: none;"><input type="checkbox" id="mergeCheck1" value=""> <span id="mergeLabel1"></span></label>
+                        <label id="mergeOption2" style="display: none;"><input type="checkbox" id="mergeCheck2" value=""> <span id="mergeLabel2"></span></label>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 8px;">Merged groups share one instructor slot</p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="btnCancelDescription">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div class="modal-overlay" id="statsModal">
+        <div class="modal" style="max-width: 600px;">
+            <h2 id="statsTitle">Instructor Statistics - January 2025</h2>
+            <div id="statsContent" style="margin-top: 16px;">
+                <!-- Stats will be rendered here -->
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="btnCloseStats">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class Days Configuration Modal -->
+    <div class="modal-overlay" id="classDaysModal">
+        <div class="modal" style="max-width: 400px;">
+            <h2>Class Days</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 16px;">Select which days of the week have classes</p>
+            <div class="days-config">
+                <label class="day-checkbox"><input type="checkbox" name="classDay" value="1"> Monday</label>
+                <label class="day-checkbox"><input type="checkbox" name="classDay" value="2"> Tuesday</label>
+                <label class="day-checkbox"><input type="checkbox" name="classDay" value="3"> Wednesday</label>
+                <label class="day-checkbox"><input type="checkbox" name="classDay" value="4"> Thursday</label>
+                <label class="day-checkbox"><input type="checkbox" name="classDay" value="5"> Friday</label>
+                <label class="day-checkbox"><input type="checkbox" name="classDay" value="6"> Saturday</label>
+                <label class="day-checkbox"><input type="checkbox" name="classDay" value="0"> Sunday</label>
+            </div>
+            
+            <div id="cancelledDaysSection" style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 16px; display: none;">
+                <h3 style="font-size: 1rem; margin-bottom: 8px;">🚫 Cancelled Days</h3>
+                <p style="color: #666; font-size: 0.85rem; margin-bottom: 12px;">These days are hidden from the calendar</p>
+                <div id="cancelledDaysList" style="max-height: 150px; overflow-y: auto;"></div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="btnCancelClassDays">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnSaveClassDays">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="js/constants.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/instructors.js"></script>
+    <script src="js/schedule.js"></script>
+    <script src="js/dragdrop.js"></script>
+    <script src="js/ui-render.js"></script>
+    <script src="js/ui-modals.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
