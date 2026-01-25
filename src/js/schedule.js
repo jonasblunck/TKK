@@ -164,7 +164,7 @@ function clearSchedule() {
     }
     
     renderCalendar();
-    showToast('Schedule cleared', 'success');
+    saveState();
 }
 
 function assignInstructor(dateStr, group, instructorId) {
