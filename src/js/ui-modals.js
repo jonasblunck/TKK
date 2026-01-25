@@ -5,8 +5,10 @@
 function openAddInstructorModal() {
     state.editingInstructorId = null;
     state.selectedDates = [];
-    state.datePickerMonth = state.currentMonth;
-    state.datePickerYear = state.currentYear;
+    
+    // Sync date picker to current calendar view
+    state.datePickerMonth = parseInt(state.currentMonth, 10);
+    state.datePickerYear = parseInt(state.currentYear, 10);
     
     document.getElementById('modalTitle').textContent = 'Add Instructor';
     document.getElementById('instructorName').value = '';
@@ -22,8 +24,10 @@ function openEditInstructorModal(id) {
     
     state.editingInstructorId = id;
     state.selectedDates = [...instructor.availableDates];
-    state.datePickerMonth = state.currentMonth;
-    state.datePickerYear = state.currentYear;
+    
+    // Sync date picker to current calendar view
+    state.datePickerMonth = parseInt(state.currentMonth, 10);
+    state.datePickerYear = parseInt(state.currentYear, 10);
     
     document.getElementById('modalTitle').textContent = 'Edit Instructor';
     document.getElementById('instructorName').value = instructor.name;

@@ -96,7 +96,6 @@ function renderCalendar() {
             
             html += `
                 <div class="calendar-cell ${group}-col ${spanClass}" 
-                     style="${span > 1 ? 'background: linear-gradient(90deg, #e8f5e9 0%, #fff8e1 50%, #ffebee 100%);' : ''}"
                      data-date="${dateStr}" 
                      data-group="${group}"
                      ondragover="handleDragOver(event)"
