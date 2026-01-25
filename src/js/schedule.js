@@ -148,16 +148,12 @@ function clearSchedule() {
     const month = state.currentMonth;
     const daysInMonth = getDaysInMonth(year, month);
     
-    // Clear instructor assignments but preserve descriptions and merges
+    // Clear everything for the current month
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = formatDate(year, month, day);
-        const existing = state.schedule[dateStr] || {};
-        state.schedule[dateStr] = {
-            beginners: { instructorId: null, description: existing.beginners?.description || '' },
-            children: { instructorId: null, description: existing.children?.description || '' },
-            adults: { instructorId: null, description: existing.adults?.description || '' },
-            merges: existing.merges || []
-        };
+        
+        // Clear all schedule data for this day
+        delete state.schedule[dateStr];
         
         // Restore any cancelled days for this month
         delete state.cancelledDays[dateStr];
