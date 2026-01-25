@@ -9,6 +9,3 @@
 - The design and feature requirements are located in docs/design.md, which you must refer to when implementing features. You MUST also keep this document updated with any changes.
 - Task breakdowns and progress tracking are in docs/tasks.md, organized by development phases. You must also keep this document updated as you identify and complete new tasks. 
 
-
-
-
