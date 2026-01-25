@@ -294,6 +294,25 @@ If this prototype proves useful, consider:
 
 ---
 
+## 11. Help System
+
+The app includes a built-in help modal accessible via the ❓ button in the header. This provides users with instructions on how to use all features.
+
+### Help Content Location
+
+The help content is defined in `src/index.html` within the `#helpModal` element.
+
+### ⚠️ Maintenance Requirement
+
+**When adding new features, always update the help modal content to include:**
+- What the feature does
+- How to access/use it
+- Any relevant tips or notes
+
+This ensures users can discover and understand new functionality without external documentation.
+
+---
+
 ## Next Steps
 
 1. Review this design document

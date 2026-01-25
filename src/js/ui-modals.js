@@ -290,3 +290,15 @@ function saveClassDays() {
     closeClassDaysModal();
     showToast('Class days updated', 'success');
 }
+
+// ============================================
+// HELP MODAL FUNCTIONS
+// ============================================
+
+function openHelpModal() {
+    document.getElementById('helpModal').classList.add('active');
+}
+
+function closeHelpModal() {
+    document.getElementById('helpModal').classList.remove('active');
+}

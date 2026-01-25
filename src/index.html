@@ -655,6 +655,49 @@
         .toast.active {
             display: block;
         }
+
+        /* === Help Modal === */
+        .help-content {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+
+        .help-section {
+            margin-bottom: 20px;
+        }
+
+        .help-section h3 {
+            font-size: 1rem;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .help-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .help-section li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .help-section li::before {
+            content: '•';
+            position: absolute;
+            left: 6px;
+            color: #4CAF50;
+        }
+
+        .help-section li strong {
+            color: #333;
+        }
     </style>    
 </head>
 <body>
@@ -663,6 +706,7 @@
         <header class="header">
             <h1>Instructor Scheduler</h1>
             <div class="header-actions">
+                <button class="btn btn-icon" id="btnHelp" title="Help">❓</button>
                 <button class="btn btn-icon" id="btnConfigDays" title="Configure class days">📅</button>
                 <label class="toggle-label" style="display: flex; align-items: center; gap: 6px; color: white; font-size: 0.85rem;">
                     <input type="checkbox" id="toggleAllDays"> Show all days
@@ -807,6 +851,55 @@
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" id="btnCancelClassDays">Cancel</button>
                 <button type="button" class="btn btn-primary" id="btnSaveClassDays">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal" style="max-width: 650px;">
+            <h2>📖 How to Use Instructor Scheduler</h2>
+            <div class="help-content">
+                <section class="help-section">
+                    <h3>👨‍🏫 Managing Instructors</h3>
+                    <ul>
+                        <li><strong>Add Instructor:</strong> Click the "+ Add" button in the sidebar to add a new instructor.</li>
+                        <li><strong>Edit/Delete:</strong> Use the buttons on each instructor card to modify or remove them.</li>
+                        <li><strong>Set Availability:</strong> When adding/editing, select which dates the instructor is available using the date picker.</li>
+                        <li><strong>Assign Groups:</strong> Choose which groups (Beginners, Children, Adults) each instructor can teach.</li>
+                    </ul>
+                </section>
+                
+                <section class="help-section">
+                    <h3>📅 Calendar & Scheduling</h3>
+                    <ul>
+                        <li><strong>Navigate Months:</strong> Use the arrow buttons to move between months.</li>
+                        <li><strong>Drag & Drop:</strong> Drag instructors from the sidebar onto calendar slots to assign them.</li>
+                        <li><strong>Auto-Generate:</strong> Click "Auto-Generate Schedule" to automatically assign available instructors.</li>
+                        <li><strong>Class Details:</strong> Click on a slot to add descriptions or merge groups.</li>
+                    </ul>
+                </section>
+                
+                <section class="help-section">
+                    <h3>⚙️ Configuration</h3>
+                    <ul>
+                        <li><strong>Class Days (📅):</strong> Configure which days of the week have classes.</li>
+                        <li><strong>Cancel Days:</strong> Right-click on a date to cancel/restore that day.</li>
+                        <li><strong>Show All Days:</strong> Toggle to display all days or only class days.</li>
+                    </ul>
+                </section>
+                
+                <section class="help-section">
+                    <h3>📊 Other Features</h3>
+                    <ul>
+                        <li><strong>Statistics:</strong> View instructor assignment stats for the current month.</li>
+                        <li><strong>Save:</strong> Save your schedule to preserve it across sessions.</li>
+                        <li><strong>Clear:</strong> Reset the schedule for the current month.</li>
+                    </ul>
+                </section>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" id="btnCloseHelp">Got it!</button>
             </div>
         </div>
     </div>

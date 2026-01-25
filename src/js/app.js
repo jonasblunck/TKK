@@ -121,6 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('modal-overlay')) closeStatsModal();
     });
     
+    // Help modal
+    document.getElementById('btnHelp').addEventListener('click', openHelpModal);
+    document.getElementById('btnCloseHelp').addEventListener('click', closeHelpModal);
+    document.getElementById('helpModal').addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) closeHelpModal();
+    });
+    
     // Class days configuration
     document.getElementById('btnConfigDays').addEventListener('click', openClassDaysModal);
     document.getElementById('btnCancelClassDays').addEventListener('click', closeClassDaysModal);
