@@ -1,0 +1,306 @@
+# Instructor Scheduler - Design Document
+
+> **Purpose**: A minimal local scheduling app for assigning instructors to training groups based on availability.
+
+**Last Updated**: 2026-01-09 by jonasblunck
+
+---
+
+## 1. Introduction/Overview
+
+A single admin user needs to schedule instructors for training sessions across three skill-level groups (Beginners, Intermediate, Advanced). The app should auto-generate an optimal schedule based on instructor availability and group assignments, while allowing manual adjustments. The output is a calendar view that can be screen-captured for sharing.
+
+This is a **demo/prototype** - no authentication, no backend, session-only data storage.
+
+---
+
+## 2. Goals
+
+| Goal | Success Criteria |
+|------|------------------|
+| Quick instructor entry | Add instructor with name, availability, teachable groups in < 30 seconds |
+| Auto-schedule generation | One-click generates valid schedule respecting all constraints |
+| Manual adjustments | Drag-and-drop to reassign after auto-generation |
+| Visual output | Calendar view suitable for print-screen sharing |
+| Cross-platform | Works on Windows and macOS in any modern browser |
+
+---
+
+## 3. User Stories
+
+### US-1: Add Instructor
+
+> As an admin, I want to add an instructor with their name, available dates, and which groups they can teach, so that the system knows who is available for scheduling.
+
+**Acceptance Criteria**:
+
+- Form to enter instructor name (required)
+- Date picker to select available dates (multi-select)
+- Checkboxes to select teachable groups (Beginners, Intermediate, Advanced)
+- Instructor appears in instructor list after saving
+
+### US-2: View Instructors
+
+> As an admin, I want to see a list of all instructors and their details, so that I can review and edit the team.
+
+**Acceptance Criteria**:
+
+- List shows all instructors with name, availability summary, and groups
+- Can edit or delete any instructor
+- Changes reflect immediately
+
+### US-3: Auto-Generate Schedule
+
+> As an admin, I want to click a button to auto-generate a schedule that assigns available instructors to groups, so that I don't have to manually figure out assignments.
+
+**Acceptance Criteria**:
+
+- Single button triggers auto-generation
+- Algorithm assigns instructors to groups respecting:
+  - Instructor availability (only scheduled on available dates)
+  - Instructor group preferences (only assigned to groups they can teach)
+  - No double-booking (one instructor per group per time slot)
+- Shows error/warning if constraints can't be satisfied
+
+### US-4: View Schedule Calendar
+
+> As an admin, I want to see the schedule as a calendar view, so that I can visualize assignments and take a screenshot to share.
+
+**Acceptance Criteria**:
+
+- Calendar shows dates on one axis, groups on the other
+- Each cell shows assigned instructor name
+- Color-coding by group (Beginners = green, Intermediate = yellow, Advanced = red)
+- Clean visual suitable for print-screen
+
+### US-5: Manually Adjust Schedule
+
+> As an admin, I want to drag and drop assignments to make manual changes, so that I can override the auto-generated schedule when needed.
+
+**Acceptance Criteria**:
+
+- Can drag an instructor assignment to a different cell
+- Can swap two instructors by dragging one onto a cell that already has an instructor assigned
+- System warns if move/swap violates constraints (instructor not available, can't teach that group)
+- Can still proceed with warning (override)
+- Can clear/unassign a cell
+
+---
+
+## 4. Functional Requirements
+
+### FR-1: Instructor Management
+
+1. The system must allow adding an instructor with:
+   - Name (text, required)
+   - Available dates (list of dates, at least one required)
+   - Teachable groups (checkboxes: Beginners, Intermediate, Advanced - at least one required)
+
+2. The system must display all instructors in a list view
+
+3. The system must allow editing any instructor's details
+
+4. The system must allow deleting an instructor
+
+### FR-2: Schedule Configuration
+
+5. The system must allow selecting a month to schedule (month picker)
+
+6. The system must display all days of the selected month in the calendar
+
+7. The system must use three fixed groups: Beginners, Intermediate, Advanced
+
+8. All three groups run simultaneously each day (one time slot)
+
+### FR-3: Auto-Generation
+
+9. The system must auto-generate a schedule with one button click
+
+10. The algorithm must respect instructor availability constraints
+
+11. The algorithm must respect instructor group preferences
+
+12. The algorithm must not double-book instructors (one group per instructor per day - cannot teach multiple groups simultaneously)
+
+13. The system must display warnings for unassigned slots (no available instructor)
+
+### FR-4: Calendar Display
+
+14. The system must display schedule as a monthly calendar grid
+
+15. Calendar must show dates as rows and groups as columns
+
+16. Each assignment must display the instructor name
+
+17. Groups must be color-coded for visual distinction
+
+18. User must be able to navigate between months
+
+### FR-5: Manual Adjustment
+
+19. The system must allow drag-and-drop to move assignments
+
+20. The system must allow drag-and-drop to swap two instructors when dropping onto an occupied slot
+
+21. The system must allow clicking to clear/unassign a slot
+
+22. The system must warn (not block) when a move or swap violates constraints
+
+23. The system must validate both instructors' constraints when performing a swap
+
+---
+
+## 5. Non-Goals (Out of Scope)
+
+The following are explicitly **NOT** included in this version:
+
+- ❌ User authentication or login
+- ❌ Persistent storage (data resets on browser refresh)
+- ❌ Multiple admins or user roles
+- ❌ Backend server or database
+- ❌ Export to file (PDF, Excel, etc.)
+- ❌ Time-of-day scheduling (AM/PM slots) - just dates
+- ❌ Recurring schedules
+- ❌ Instructor capacity limits (teaching multiple groups same day)
+- ❌ Mobile-optimized responsive design
+- ❌ Undo/redo functionality
+- ❌ Notifications or reminders
+
+---
+
+## 6. Design Considerations
+
+### UI Layout
+
+```
++--------------------------------------------------+
+|  INSTRUCTOR SCHEDULER          [< Jan 2025 >]    |
++--------------------------------------------------+
+|                                                  |
+|  [+ Add Instructor]  [Auto-Generate Schedule]    |
+|                                                  |
++------------------------+-------------------------+
+|  INSTRUCTORS           |  JANUARY 2025           |
+|------------------------|-------------------------|
+|  • Alice               |  Date | Beg | Int | Adv |
+|    Jan 6-10, 13-17     |-------|-----|-----|-----|
+|    [Beg] [Int]         |  Mon 6| Bob |Alice|     |
+|                        |  Tue 7|Alice| Bob | Bob |
+|  • Bob                 |  Wed 8| Bob |Alice|Alice|
+|    Jan 6-31            |  ...  |     |     |     |
+|    [Beg] [Int] [Adv]   |  Fri31| Bob |Alice| Bob |
++------------------------+-------------------------+
+```
+
+### Color Coding
+
+- Beginners: Green (`#4CAF50`)
+- Intermediate: Yellow/Orange (`#FF9800`)
+- Advanced: Red (`#F44336`)
+
+### Interaction Patterns
+
+- **Add Instructor**: Modal or slide-out form
+- **Edit Instructor**: Click on instructor in list
+- **Drag-and-Drop**: Drag instructor name between calendar cells
+- **Clear Assignment**: Click "X" on assigned cell or drag to trash
+
+---
+
+## 7. Technical Considerations
+
+### Technology Stack
+
+| Component | Choice | Rationale |
+|-----------|--------|-----------|
+| Frontend | Single HTML file with vanilla JS or React | Cross-platform, no build required for vanilla |
+| Styling | Tailwind CSS (CDN) or simple CSS | Quick styling, no build step |
+| Calendar | Custom grid or lightweight library (e.g., FullCalendar lite) | Simple requirements |
+| Drag-and-drop | Native HTML5 drag-and-drop or lightweight library | Avoid dependencies |
+| Data storage | JavaScript in-memory (session only) | Simplest approach per requirements |
+
+### Recommended Approach
+
+**Option A - Vanilla (Simplest)**:
+
+- Single `index.html` with inline CSS and JS
+- No build tools, open directly in browser
+- Best for "quick to produce"
+
+**Option B - React (More maintainable)**:
+
+- Vite + React for quick setup
+- Component-based for easier extension
+- Requires `npm install` but works cross-platform
+
+### File Structure (Vanilla)
+
+```
+instructor-scheduler/
+  index.html      # Single file with HTML, CSS, JS
+  README.md       # How to run
+```
+
+### Auto-Generation Algorithm
+
+Simple greedy assignment:
+
+```
+for each date in schedule range:
+  for each group in [Beginners, Intermediate, Advanced]:
+    find instructors who:
+      - are available on this date
+      - can teach this group
+      - are not already assigned to another group this date
+    assign first available instructor (or random for variety)
+```
+
+---
+
+## 8. Success Metrics
+
+Since this is a local demo, success is qualitative:
+
+| Metric | Target |
+|--------|--------|
+| Time to add instructor | < 30 seconds |
+| Time to generate schedule | < 1 second (instant) |
+| Usability | Admin can use without instructions |
+| Visual clarity | Calendar screenshot is immediately understandable |
+
+---
+
+## 9. Clarified Constraints
+
+| Constraint | Decision |
+|------------|----------|
+| Time slots per day | One slot - all three groups run simultaneously |
+| Instructor per day | One group max (cannot be in two places at once) |
+| Schedule duration | Monthly - user picks which month to plan |
+| Future persistence | Out of scope for MVP; consider local storage later |
+
+---
+
+## 10. Future Enhancements (Post-MVP)
+
+If this prototype proves useful, consider:
+
+- Local storage persistence (survives refresh)
+- Export schedule to JSON/CSV
+- Import instructor list from file
+- Time-of-day slots (AM/PM or hourly)
+- Conflict resolution suggestions
+- Print-friendly CSS
+
+---
+
+## Next Steps
+
+1. Review this design document
+2. Answer open questions if needed
+3. Run `generate-tasks.prompt.md` to create implementation tasks
+4. Implement MVP
+
+---
+
+*Generated following the PRD workflow from `.github/prompts/prd-workflow/create-prd.prompt.md`*

@@ -1,0 +1,224 @@
+# Instructor Scheduler - Implementation Tasks
+
+> **Design Document**: [design.md](design.md)
+> **Generated**: 2025-12-18 by jonasblunck
+
+---
+
+## Tasks
+
+### Phase 1: Project Setup
+
+**Status**: Not Started  
+**Progress**: 0/4 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 1.0 Create project structure and base HTML
+  - **Relevant Documentation:**
+    - [design.md](design.md) - Technical stack (vanilla HTML/JS/CSS), file structure
+  - [ ] 1.1 Create `instructor-scheduler/` directory in project root
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 1.2 Create `index.html` with basic HTML5 structure and viewport meta
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 1.3 Add CSS reset and base styles (colors for groups, layout grid)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 1.4 Create empty JavaScript section with app state object structure
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
+### Phase 2: Instructor Management
+
+**Status**: Not Started  
+**Progress**: 0/6 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 2.0 Build instructor CRUD functionality
+  - **Relevant Documentation:**
+    - [design.md](design.md) - FR-1 (Instructor Management), US-1 (Add Instructor), US-2 (View Instructors)
+  - [ ] 2.1 Create instructor list panel HTML (left sidebar)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 2.2 Implement "Add Instructor" modal/form with fields: name, available dates, teachable groups
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 2.3 Create date picker for selecting multiple available dates
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 2.4 Implement add instructor to state and render to list
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 2.5 Implement edit instructor functionality (click to edit)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 2.6 Implement delete instructor functionality with confirmation
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
+### Phase 3: Calendar Display
+
+**Status**: Not Started  
+**Progress**: 0/5 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 3.0 Build monthly calendar grid with group columns
+  - **Relevant Documentation:**
+    - [design.md](design.md) - FR-4 (Calendar Display), FR-2 (Schedule Configuration), UI mockup
+  - [ ] 3.1 Create calendar container HTML with header (month name, navigation arrows)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 3.2 Implement month navigation (previous/next month buttons, month picker)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 3.3 Generate calendar grid dynamically: rows = days of month, columns = Beginners/Intermediate/Advanced
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 3.4 Apply color coding to group columns (green/yellow/red)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 3.5 Style cells to display instructor names clearly (suitable for screenshot)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
+### Phase 4: Auto-Generate Schedule
+
+**Status**: Not Started  
+**Progress**: 0/5 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 4.0 Implement scheduling algorithm
+  - **Relevant Documentation:**
+    - [design.md](design.md) - FR-3 (Auto-Generation), algorithm pseudocode, constraints
+  - [ ] 4.1 Add "Auto-Generate Schedule" button to UI
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 4.2 Implement algorithm: for each day, assign available instructors to groups they can teach
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 4.3 Ensure no instructor is double-booked (one group per day max)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 4.4 Store assignments in state and render to calendar grid
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 4.5 Display warnings for unassigned slots (no available instructor)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
+### Phase 5: Manual Adjustments
+
+**Status**: Not Started  
+**Progress**: 0/5 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 5.0 Add drag-and-drop for schedule adjustments
+  - **Relevant Documentation:**
+    - [design.md](design.md) - FR-5 (Manual Adjustment), US-5 user story
+  - [ ] 5.1 Make instructor assignments draggable (HTML5 drag-and-drop)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 5.2 Make calendar cells drop targets
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 5.3 Implement drop handler: update assignment in state, re-render
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 5.4 Add constraint validation on drop (warn if instructor unavailable or can't teach group)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 5.5 Implement clear/unassign functionality (click X or drag to remove)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
+### Phase 6: Polish & Testing
+
+**Status**: Not Started  
+**Progress**: 0/4 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 6.0 Final polish and edge case handling
+  - **Relevant Documentation:**
+    - [design.md](design.md) - Success metrics, non-goals, future enhancements
+  - [ ] 6.1 Handle edge cases: no instructors, all instructors unavailable, empty month
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 6.2 Add visual feedback: hover states, drag indicators, success/error messages
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 6.3 Test cross-browser (Chrome, Firefox, Safari) on Windows and macOS
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 6.4 Create README.md with usage instructions
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
+## Summary
+
+| Phase | Description | Tasks |
+|-------|-------------|-------|
+| 1 | Project Setup | 4 |
+| 2 | Instructor Management | 6 |
+| 3 | Calendar Display | 5 |
+| 4 | Auto-Generate Schedule | 5 |
+| 5 | Manual Adjustments | 5 |
+| 6 | Polish & Testing | 4 |
+| **Total** | | **29** |
+
+---
+
+## Next Steps
+
+Run `process-task-list.prompt.md` to execute tasks one sub-task at a time.
+
+---
+
+*Generated following the task workflow from `.github/prompts/prd-workflow/generate-tasks.prompt.md`*
