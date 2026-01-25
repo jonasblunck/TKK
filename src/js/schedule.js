@@ -158,6 +158,9 @@ function clearSchedule() {
             adults: { instructorId: null, description: existing.adults?.description || '' },
             merges: existing.merges || []
         };
+        
+        // Restore any cancelled days for this month
+        delete state.cancelledDays[dateStr];
     }
     
     renderCalendar();
