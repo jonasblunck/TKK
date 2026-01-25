@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKK Unit Tests</title>
+    <style>
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            color: #569cd6;
+            margin-bottom: 20px;
+        }
+        #output {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        .pass { color: #4ec9b0; }
+        .fail { color: #f14c4c; }
+        .suite { color: #dcdcaa; font-weight: bold; margin-top: 16px; }
+        .separator { color: #808080; }
+        .summary { 
+            margin-top: 20px; 
+            padding: 10px; 
+            background: #2d2d2d; 
+            border-radius: 4px;
+        }
+        .success { color: #4ec9b0; }
+        .failure { color: #f14c4c; }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 TKK Unit Tests</h1>
+    <button onclick="runTests()">Run All Tests</button>
+    <div id="output"></div>
+
+    <!-- Minimal DOM elements needed by the app -->
+    <div id="toast" class="toast" style="display:none;"></div>
+    <div id="classDaysModal"></div>
+
+    <!-- Load app modules -->
+    <script src="../src/js/constants.js"></script>
+    <script src="../src/js/state.js"></script>
+    <script src="../src/js/utils.js"></script>
+    <script src="../src/js/instructors.js"></script>
+    <script src="../src/js/schedule.js"></script>
+    <script src="../src/js/ui-modals.js"></script>
+
+    <!-- Load tests -->
+    <script src="tests.js"></script>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        // Override console.log to display in the page
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalClear = console.clear;
+        
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+        
+        function formatLine(text) {
+            text = escapeHtml(text);
+            
+            if (text.includes('✅')) {
+                return `<span class="pass">${text}</span>`;
+            } else if (text.includes('❌')) {
+                return `<span class="fail">${text}</span>`;
+            } else if (text.includes('📦 Test Suite:')) {
+                return `<span class="suite">${text}</span>`;
+            } else if (text.includes('─') || text.includes('═')) {
+                return `<span class="separator">${text}</span>`;
+            } else if (text.includes('🎉')) {
+                return `<div class="summary success">${text}</div>`;
+            } else if (text.includes('⚠️')) {
+                return `<div class="summary failure">${text}</div>`;
+            } else if (text.includes('📊')) {
+                return `<div class="summary">${text}</div>`;
+            }
+            return text;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const text = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+            output.innerHTML += formatLine(text) + '\n';
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            const text = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+            output.innerHTML += `<span class="fail">${escapeHtml(text)}</span>\n`;
+        };
+        
+        console.clear = function() {
+            originalClear.apply(console);
+            output.innerHTML = '';
+        };
+        
+        // Stub out UI functions that aren't needed for tests
+        window.renderCalendar = function() {};
+        window.renderInstructorList = function() {};
+        window.renderDatePicker = function() {};
+        
+        function runTests() {
+            output.innerHTML = '';
+            runAllTests();
+        }
+        
+        // Auto-run on load
+        window.onload = runTests;
+    </script>
+</body>
+</html>
