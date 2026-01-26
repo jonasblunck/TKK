@@ -533,11 +533,14 @@ function testStatistics() {
     
     TestRunner.test('calculateStats counts unassigned slots', () => {
         const { unassignedSlots, daysInMonth } = calculateStats();
-        // Total possible slots = 31 days × 3 groups = 93
-        // Assigned slots = 5
-        // Unassigned = 93 - 5 = 88
-        const totalPossibleSlots = daysInMonth * GROUPS.length;
-        const expectedUnassigned = totalPossibleSlots - 5; // 5 assignments made above
+        // With classDays = [1, 4, 6] (Mon, Thu, Sat), January 2025 has 13 class days
+        // Mondays: 6, 13, 20, 27 (4), Thursdays: 2, 9, 16, 23, 30 (5), Saturdays: 4, 11, 18, 25 (4)
+        // Total possible slots = 13 days × 3 groups = 39
+        // But only days with schedule entries are counted for assignments
+        // Jan 6 (Mon) and Jan 9 (Thu) have assignments
+        // So 13 - 2 = 11 days with no assignments × 3 groups = 33 unassigned
+        // Plus 1 unassigned on Jan 9 (adults) = 34 unassigned
+        const expectedUnassigned = (daysInMonth - 2) * GROUPS.length + 1;
         TestRunner.assertEqual(unassignedSlots, expectedUnassigned);
     });
     
@@ -558,9 +561,48 @@ function testStatistics() {
         TestRunner.assertEqual(mergedDays, 1);
     });
     
-    TestRunner.test('calculateStats returns daysInMonth', () => {
+    TestRunner.test('calculateStats returns class days count as daysInMonth', () => {
         const { daysInMonth } = calculateStats();
-        TestRunner.assertEqual(daysInMonth, 31); // January has 31 days
+        // With classDays = [1, 4, 6] (Mon, Thu, Sat), January 2025 has 13 class days
+        TestRunner.assertEqual(daysInMonth, 13);
+    });
+    
+    TestRunner.test('calculateStats only counts configured class days', () => {
+        // Reset schedule for clean test
+        state.schedule = {};
+        state.cancelledDays = {};
+        
+        // Set class days to only Monday (1) and Wednesday (3)
+        state.classDays = [1, 3];
+        
+        const { daysInMonth, unassignedSlots } = calculateStats();
+        
+        // January 2025: Mondays = 6, 13, 20, 27 (4 days), Wednesdays = 1, 8, 15, 22, 29 (5 days)
+        // Total class days = 9
+        TestRunner.assertEqual(daysInMonth, 9);
+        
+        // Unassigned slots = 9 days × 3 groups = 27
+        TestRunner.assertEqual(unassignedSlots, 27);
+    });
+    
+    TestRunner.test('calculateStats excludes cancelled days', () => {
+        // Reset for clean test
+        state.schedule = {};
+        state.classDays = [1, 3]; // Monday and Wednesday
+        
+        // Cancel some days
+        state.cancelledDays = {
+            '2025-01-06': true,  // Monday
+            '2025-01-08': true   // Wednesday
+        };
+        
+        const { daysInMonth, unassignedSlots } = calculateStats();
+        
+        // 9 class days - 2 cancelled = 7 days
+        TestRunner.assertEqual(daysInMonth, 7);
+        
+        // Unassigned slots = 7 days × 3 groups = 21
+        TestRunner.assertEqual(unassignedSlots, 21);
     });
     
     window.renderCalendar = originalRenderCalendar;

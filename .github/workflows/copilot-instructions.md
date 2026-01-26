@@ -8,6 +8,7 @@
 - After making any code changes, always run the test suite: `node test/run-tests.js`
 - Ensure all tests pass before considering a task complete.
 - If a change breaks existing tests, fix the code or update the tests as appropriate. Always ask for confirmation before modifying existing tests.
+- **When adding or modifying logic** (calculations, algorithms, data processing, etc.), add corresponding unit tests to cover the new/changed behavior.
 
 ## Repository layout
 - Source code lives in the `src/` directory.

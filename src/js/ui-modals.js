@@ -144,9 +144,24 @@ function calculateStats() {
     let totalAssignments = 0;
     let unassignedSlots = 0;
     let mergedDays = 0;
+    let classDaysCount = 0;
     
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = formatDate(year, month, day);
+        const date = new Date(year, month, day);
+        const dayOfWeek = date.getDay();
+        
+        // Skip days that aren't class days
+        if (!state.classDays.includes(dayOfWeek)) {
+            continue;
+        }
+        
+        // Skip cancelled days
+        if (state.cancelledDays[dateStr]) {
+            continue;
+        }
+        
+        classDaysCount++;
         const merges = getMerges(dateStr);
         
         if (merges.length > 0) mergedDays++;
@@ -169,7 +184,7 @@ function calculateStats() {
         }
     }
     
-    return { stats, totalAssignments, unassignedSlots, mergedDays, daysInMonth };
+    return { stats, totalAssignments, unassignedSlots, mergedDays, daysInMonth: classDaysCount };
 }
 
 function openStatsModal() {
