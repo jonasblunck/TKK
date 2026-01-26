@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Loaded shared schedule!', 'success');
     }
     
-    // Initial render
-    renderInstructorList();
+    // Initial render (skip instructor list in view-only mode)
+    if (typeof isViewOnlyMode === 'undefined' || !isViewOnlyMode) {
+        renderInstructorList();
+    }
     renderCalendar();
     
     // Actions dropdown toggle

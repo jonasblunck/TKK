@@ -450,7 +450,8 @@ function generateShareUrl() {
     const json = JSON.stringify(data);
     const compressed = LZString.compressToEncodedURIComponent(json);
     const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}#share=${compressed}`;
+    // Use query parameter instead of hash - URL shorteners preserve query params but strip hashes
+    return `${baseUrl}?s=${compressed}`;
 }
 
 async function shortenUrl(longUrl) {
@@ -473,10 +474,18 @@ async function shortenUrl(longUrl) {
 }
 
 function loadStateFromUrl() {
+    // Check for query parameter first (new format, works with URL shorteners)
+    const urlParams = new URLSearchParams(window.location.search);
+    const shareParam = urlParams.get('s');
+    
+    // Also check hash for backwards compatibility
     const hash = window.location.hash;
-    if (hash && hash.startsWith('#share=')) {
+    const hashData = (hash && hash.startsWith('#share=')) ? hash.substring(7) : null;
+    
+    const compressed = shareParam || hashData;
+    
+    if (compressed) {
         try {
-            const compressed = hash.substring(7); // Remove '#share='
             const json = LZString.decompressFromEncodedURIComponent(compressed);
             if (!json) {
                 throw new Error('Failed to decompress data');
@@ -532,12 +541,18 @@ function loadStateFromUrl() {
 function applyViewOnlyMode() {
     // Add a class to the body for CSS styling
     document.body.classList.add('view-only-mode');
+    console.log('View-only mode applied:', document.body.classList.contains('view-only-mode'));
     
     // Update the header title to indicate shared view
     const header = document.querySelector('.header h1');
     if (header) {
-        header.textContent = 'Shared Schedule (View Only)';
+        header.textContent = 'Shared Schedule';
     }
+}
+
+// Check if we're in view-only mode (for use by other modules)
+function isInViewOnlyMode() {
+    return isViewOnlyMode;
 }
 
 async function copyToClipboard(text) {

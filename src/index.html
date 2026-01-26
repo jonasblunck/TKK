@@ -29,28 +29,34 @@
         }
 
         /* === View Only Mode (shared links) === */
-        .view-only-mode .sidebar {
-            display: none;
+        body.view-only-mode .sidebar {
+            display: none !important;
         }
         
-        .view-only-mode .header-actions {
-            display: none;
+        body.view-only-mode .header-actions {
+            display: none !important;
         }
         
-        .view-only-mode .app-container {
-            grid-template-columns: 1fr;
+        body.view-only-mode .app-container {
+            grid-template-columns: 1fr !important;
         }
         
-        .view-only-mode .calendar-nav button {
-            display: none;
+        body.view-only-mode .calendar-nav button {
+            display: none !important;
         }
         
-        .view-only-mode .calendar-cell.slot {
+        body.view-only-mode .calendar-cell {
             cursor: default;
         }
         
-        .view-only-mode .calendar-cell.slot:hover {
+        body.view-only-mode .calendar-cell:hover {
             background: inherit;
+        }
+        
+        body.view-only-mode .header h1::after {
+            content: ' (View Only)';
+            font-size: 0.8em;
+            opacity: 0.7;
         }
 
         .header {

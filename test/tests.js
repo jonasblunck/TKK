@@ -865,7 +865,7 @@ function testShareLink() {
         TestRunner.assertTrue(shareData.viewOnly);
     });
     
-    TestRunner.test('generateShareUrl creates valid URL with hash', () => {
+    TestRunner.test('generateShareUrl creates valid URL with query param', () => {
         state.currentMonth = 0;
         state.currentYear = 2025;
         state.instructors = [{ id: '1', name: 'Test', groups: [], availableDates: [] }];
@@ -874,7 +874,7 @@ function testShareLink() {
         state.cancelledDays = {};
         
         const url = generateShareUrl();
-        TestRunner.assertTrue(url.includes('#share='), 'URL should contain #share=');
+        TestRunner.assertTrue(url.includes('?s='), 'URL should contain ?s= query parameter');
     });
     
     TestRunner.test('Share URL can be decoded back to original state', () => {
@@ -886,8 +886,8 @@ function testShareLink() {
         state.cancelledDays = { '2025-01-03': true };
         
         const url = generateShareUrl();
-        const hashData = url.split('#share=')[1];
-        const decompressed = LZString.decompressFromEncodedURIComponent(hashData);
+        const paramData = url.split('?s=')[1];
+        const decompressed = LZString.decompressFromEncodedURIComponent(paramData);
         const parsed = JSON.parse(decompressed);
         
         TestRunner.assertEqual(parsed.month, 0);
