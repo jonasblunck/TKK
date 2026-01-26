@@ -754,6 +754,7 @@
                         <button class="dropdown-item" id="btnConfigDays">📅 Configure Class Days</button>
                         <button class="dropdown-item" id="btnStats">📊 Statistics</button>
                         <button class="dropdown-item" id="btnExport">📷 Export as Image</button>
+                        <button class="dropdown-item" id="btnShare">🔗 Share Schedule</button>
                         <div class="dropdown-divider"></div>
                         <label class="dropdown-item" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                             <input type="checkbox" id="toggleAllDays"> Show all days
@@ -902,6 +903,39 @@
         </div>
     </div>
 
+    <!-- Share Modal -->
+    <div class="modal-overlay" id="shareModal">
+        <div class="modal" style="max-width: 550px;">
+            <h2>🔗 Share Schedule</h2>
+            <p style="margin-bottom: 16px; color: #666;">Share this link with others to let them view your schedule. They won't need to have any saved data - everything is included in the link!</p>
+            
+            <div class="form-group">
+                <label>Full URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="shareLongUrl" readonly style="flex: 1; font-size: 0.85rem;">
+                    <button class="btn btn-secondary" id="btnCopyLongUrl" title="Copy">📋 Copy</button>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 16px 0;">
+                <button class="btn btn-primary" id="btnShortenUrl">🔗 Shorten URL</button>
+                <p id="shortenStatus" style="margin-top: 8px; font-size: 0.85rem; color: #666;"></p>
+            </div>
+            
+            <div class="form-group" id="shortUrlSection" style="display: none;">
+                <label>Short URL</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="shareShortUrl" readonly style="flex: 1; font-weight: 600;">
+                    <button class="btn btn-primary" id="btnCopyShortUrl" title="Copy">📋 Copy</button>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="btnCloseShare">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Help Modal -->
     <div class="modal-overlay" id="helpModal">
         <div class="modal" style="max-width: 650px;">
@@ -958,6 +992,7 @@
     <!-- JavaScript Modules -->
     <script src="js/constants.js"></script>
     <script src="js/state.js"></script>
+    <script src="js/share.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/instructors.js"></script>
     <script src="js/schedule.js"></script>

@@ -807,6 +807,74 @@ function testAutoGenerate() {
 }
 
 // ============================================
+// SHARE LINK TESTS
+// ============================================
+
+function testShareLink() {
+    TestRunner.suite('Share Link Functionality');
+    
+    TestRunner.test('LZString compresses and decompresses correctly', () => {
+        const original = '{"instructors":[{"id":"1","name":"Test"}],"schedule":{},"classDays":[1,4,6]}';
+        const compressed = LZString.compressToEncodedURIComponent(original);
+        const decompressed = LZString.decompressFromEncodedURIComponent(compressed);
+        TestRunner.assertEqual(decompressed, original);
+    });
+    
+    TestRunner.test('LZString compression reduces size', () => {
+        const original = '{"instructors":[{"id":"1","name":"Test Instructor","groups":["beginners","children"],"availableDates":["2025-01-01","2025-01-02","2025-01-03","2025-01-04","2025-01-05"]}],"schedule":{"2025-01-01":{"beginners":{"instructorId":"1"}}},"classDays":[1,4,6],"cancelledDays":{}}';
+        const compressed = LZString.compressToEncodedURIComponent(original);
+        TestRunner.assertTrue(compressed.length < original.length, 'Compressed should be smaller');
+    });
+    
+    TestRunner.test('getShareableState returns correct structure', () => {
+        state.instructors = [{ id: '1', name: 'Test', groups: [], availableDates: [] }];
+        state.schedule = { '2025-01-01': { beginners: { instructorId: '1' } } };
+        state.classDays = [1, 4];
+        state.cancelledDays = { '2025-01-02': true };
+        
+        const shareData = getShareableState();
+        
+        TestRunner.assertEqual(shareData.instructors.length, 1);
+        TestRunner.assertEqual(shareData.instructors[0].name, 'Test');
+        TestRunner.assertTrue('2025-01-01' in shareData.schedule);
+        TestRunner.assertEqual(shareData.classDays.length, 2);
+        TestRunner.assertTrue('2025-01-02' in shareData.cancelledDays);
+    });
+    
+    TestRunner.test('generateShareUrl creates valid URL with hash', () => {
+        state.instructors = [{ id: '1', name: 'Test', groups: [], availableDates: [] }];
+        state.schedule = {};
+        state.classDays = [1, 4, 6];
+        state.cancelledDays = {};
+        
+        const url = generateShareUrl();
+        TestRunner.assertTrue(url.includes('#share='), 'URL should contain #share=');
+    });
+    
+    TestRunner.test('Share URL can be decoded back to original state', () => {
+        const testInstructors = [{ id: '1', name: 'ShareTest', groups: ['beginners'], availableDates: ['2025-01-01'] }];
+        const testSchedule = { '2025-01-01': { beginners: { instructorId: '1', description: 'Test class' } } };
+        const testClassDays = [1, 4, 6];
+        const testCancelledDays = { '2025-01-03': true };
+        
+        state.instructors = testInstructors;
+        state.schedule = testSchedule;
+        state.classDays = testClassDays;
+        state.cancelledDays = testCancelledDays;
+        
+        const url = generateShareUrl();
+        const hashData = url.split('#share=')[1];
+        const decompressed = LZString.decompressFromEncodedURIComponent(hashData);
+        const parsed = JSON.parse(decompressed);
+        
+        TestRunner.assertEqual(parsed.instructors[0].name, 'ShareTest');
+        TestRunner.assertEqual(parsed.schedule['2025-01-01'].beginners.description, 'Test class');
+        TestRunner.assertEqual(parsed.classDays.length, 3);
+        TestRunner.assertTrue('2025-01-03' in parsed.cancelledDays);
+    });
+}
+
+// ============================================
 // MAIN TEST RUNNER
 // ============================================
 
@@ -827,6 +895,7 @@ function runAllTests() {
         testStatistics();
         testStoragePersistence();
         testAutoGenerate();
+        testShareLink();
     } finally {
         TestRunner.restoreState();
     }

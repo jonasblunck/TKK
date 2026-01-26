@@ -3,8 +3,15 @@
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Load saved state from localStorage
-    loadState();
+    // Check for shared state in URL first (takes priority over localStorage)
+    const loadedFromUrl = loadStateFromUrl();
+    
+    // If no shared state in URL, load from localStorage
+    if (!loadedFromUrl) {
+        loadState();
+    } else {
+        showToast('Loaded shared schedule!', 'success');
+    }
     
     // Initial render
     renderInstructorList();
@@ -151,6 +158,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnCloseHelp').addEventListener('click', closeHelpModal);
     document.getElementById('helpModal').addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) closeHelpModal();
+    });
+    
+    // Share modal
+    document.getElementById('btnShare').addEventListener('click', openShareModal);
+    document.getElementById('btnCloseShare').addEventListener('click', closeShareModal);
+    document.getElementById('btnShortenUrl').addEventListener('click', handleShortenUrl);
+    document.getElementById('btnCopyLongUrl').addEventListener('click', handleCopyLongUrl);
+    document.getElementById('btnCopyShortUrl').addEventListener('click', handleCopyShortUrl);
+    document.getElementById('shareModal').addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) closeShareModal();
     });
     
     // Class days configuration
