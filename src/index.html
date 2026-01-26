@@ -28,6 +28,31 @@
             gap: 0;
         }
 
+        /* === View Only Mode (shared links) === */
+        .view-only-mode .sidebar {
+            display: none;
+        }
+        
+        .view-only-mode .header-actions {
+            display: none;
+        }
+        
+        .view-only-mode .app-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .view-only-mode .calendar-nav button {
+            display: none;
+        }
+        
+        .view-only-mode .calendar-cell.slot {
+            cursor: default;
+        }
+        
+        .view-only-mode .calendar-cell.slot:hover {
+            background: inherit;
+        }
+
         .header {
             grid-column: 1 / -1;
             background: #1a1a2e;
@@ -907,7 +932,7 @@
     <div class="modal-overlay" id="shareModal">
         <div class="modal" style="max-width: 550px;">
             <h2>🔗 Share Schedule</h2>
-            <p style="margin-bottom: 16px; color: #666;">Share this link with others to let them view your schedule. They won't need to have any saved data - everything is included in the link!</p>
+            <p id="shareDescription" style="margin-bottom: 16px; color: #666;">Share this link with others to let them view the schedule for the current month. They'll see a read-only view with no editing options.</p>
             
             <div class="form-group">
                 <label>Full URL</label>

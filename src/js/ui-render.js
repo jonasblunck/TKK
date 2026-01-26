@@ -74,7 +74,11 @@ function renderCalendar() {
             continue;
         }
         
-        html += `<div class="calendar-cell date-cell">${dayName} ${day} <button class="cancel-btn" onclick="cancelDay('${dateStr}')" title="Cancel this day">❌</button></div>`;
+        // In view-only mode, don't show the cancel button
+        const cancelBtn = (typeof isViewOnlyMode !== 'undefined' && isViewOnlyMode) 
+            ? '' 
+            : `<button class="cancel-btn" onclick="cancelDay('${dateStr}')" title="Cancel this day">❌</button>`;
+        html += `<div class="calendar-cell date-cell">${dayName} ${day} ${cancelBtn}</div>`;
         
         for (const group of GROUPS) {
             const mergeInfo = isGroupMerged(dateStr, group);
@@ -94,17 +98,23 @@ function renderCalendar() {
             const spanClass = span > 1 ? `merged-span-${span}` : '';
             const bgClass = span === 3 ? 'all-levels-col' : (span === 2 && group === 'beginners' ? 'beg-chi-col' : (span === 2 && group === 'children' ? 'chi-adu-col' : `${group}-col`));
             
+            // In view-only mode, disable all interactive features
+            const viewOnly = typeof isViewOnlyMode !== 'undefined' && isViewOnlyMode;
+            const dragHandlers = viewOnly ? '' : `ondragover="handleDragOver(event)" ondrop="handleDrop(event)"`;
+            const dblClickHandler = viewOnly ? '' : `ondblclick="openDescriptionModal('${dateStr}', '${group}')"`;
+            
             html += `
-                <div class="calendar-cell ${group}-col ${spanClass}" 
+                <div class="calendar-cell ${group}-col ${spanClass} ${viewOnly ? 'view-only' : ''}" 
                      data-date="${dateStr}" 
                      data-group="${group}"
-                     ondragover="handleDragOver(event)"
-                     ondrop="handleDrop(event)"
-                     ondblclick="openDescriptionModal('${dateStr}', '${group}')">
+                     ${dragHandlers}
+                     ${dblClickHandler}>
                     <div class="cell-content">
                         ${span > 1 ? `<span class="merge-indicator">${mergedLabel}</span>` : ''}
                         ${instructor 
-                            ? `<span class="assignment" 
+                            ? viewOnly 
+                                ? `<span class="assignment">${instructor.name}</span>`
+                                : `<span class="assignment" 
                                     draggable="true" 
                                     data-instructor-id="${instructor.id}"
                                     data-source-date="${dateStr}"
@@ -113,9 +123,12 @@ function renderCalendar() {
                                     onclick="handleAssignmentClick(event, '${dateStr}', '${group}')">${instructor.name}</span>`
                             : `<span class="unassigned">-</span>`
                         }
-                        ${hasDescription 
-                            ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}" onclick="openDescriptionModal('${dateStr}', '${group}')">${description.length > 30 ? description.substring(0, 30) + '...' : description}</div>`
-                            : `<div class="cell-description add-desc" onclick="openDescriptionModal('${dateStr}', '${group}')">+ Add focus</div>`
+                        ${viewOnly 
+                            ? (hasDescription ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}">${description.length > 30 ? description.substring(0, 30) + '...' : description}</div>` : '')
+                            : (hasDescription 
+                                ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}" onclick="openDescriptionModal('${dateStr}', '${group}')">${description.length > 30 ? description.substring(0, 30) + '...' : description}</div>`
+                                : `<div class="cell-description add-desc" onclick="openDescriptionModal('${dateStr}', '${group}')">+ Add focus</div>`
+                            )
                         }
                     </div>
                 </div>

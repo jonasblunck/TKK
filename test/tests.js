@@ -826,22 +826,48 @@ function testShareLink() {
         TestRunner.assertTrue(compressed.length < original.length, 'Compressed should be smaller');
     });
     
-    TestRunner.test('getShareableState returns correct structure', () => {
-        state.instructors = [{ id: '1', name: 'Test', groups: [], availableDates: [] }];
-        state.schedule = { '2025-01-01': { beginners: { instructorId: '1' } } };
+    TestRunner.test('getShareableState returns current month data only', () => {
+        state.currentMonth = 0; // January
+        state.currentYear = 2025;
+        state.instructors = [
+            { id: '1', name: 'Test', groups: ['beginners'], availableDates: [] },
+            { id: '2', name: 'Unused', groups: ['adults'], availableDates: [] }
+        ];
+        state.schedule = { 
+            '2025-01-01': { beginners: { instructorId: '1' } },
+            '2025-02-01': { beginners: { instructorId: '2' } } // Different month - should be excluded
+        };
         state.classDays = [1, 4];
-        state.cancelledDays = { '2025-01-02': true };
+        state.cancelledDays = { 
+            '2025-01-02': true,
+            '2025-02-03': true // Different month - should be excluded
+        };
         
         const shareData = getShareableState();
         
+        // Should include month and year
+        TestRunner.assertEqual(shareData.month, 0);
+        TestRunner.assertEqual(shareData.year, 2025);
+        
+        // Should only include January schedule
+        TestRunner.assertTrue('2025-01-01' in shareData.schedule);
+        TestRunner.assertFalse('2025-02-01' in shareData.schedule);
+        
+        // Should only include January cancelled days
+        TestRunner.assertTrue('2025-01-02' in shareData.cancelledDays);
+        TestRunner.assertFalse('2025-02-03' in shareData.cancelledDays);
+        
+        // Should only include instructors assigned this month
         TestRunner.assertEqual(shareData.instructors.length, 1);
         TestRunner.assertEqual(shareData.instructors[0].name, 'Test');
-        TestRunner.assertTrue('2025-01-01' in shareData.schedule);
-        TestRunner.assertEqual(shareData.classDays.length, 2);
-        TestRunner.assertTrue('2025-01-02' in shareData.cancelledDays);
+        
+        // Should have viewOnly flag
+        TestRunner.assertTrue(shareData.viewOnly);
     });
     
     TestRunner.test('generateShareUrl creates valid URL with hash', () => {
+        state.currentMonth = 0;
+        state.currentYear = 2025;
         state.instructors = [{ id: '1', name: 'Test', groups: [], availableDates: [] }];
         state.schedule = {};
         state.classDays = [1, 4, 6];
@@ -852,25 +878,25 @@ function testShareLink() {
     });
     
     TestRunner.test('Share URL can be decoded back to original state', () => {
-        const testInstructors = [{ id: '1', name: 'ShareTest', groups: ['beginners'], availableDates: ['2025-01-01'] }];
-        const testSchedule = { '2025-01-01': { beginners: { instructorId: '1', description: 'Test class' } } };
-        const testClassDays = [1, 4, 6];
-        const testCancelledDays = { '2025-01-03': true };
-        
-        state.instructors = testInstructors;
-        state.schedule = testSchedule;
-        state.classDays = testClassDays;
-        state.cancelledDays = testCancelledDays;
+        state.currentMonth = 0;
+        state.currentYear = 2025;
+        state.instructors = [{ id: '1', name: 'ShareTest', groups: ['beginners'], availableDates: ['2025-01-01'] }];
+        state.schedule = { '2025-01-01': { beginners: { instructorId: '1', description: 'Test class' } } };
+        state.classDays = [1, 4, 6];
+        state.cancelledDays = { '2025-01-03': true };
         
         const url = generateShareUrl();
         const hashData = url.split('#share=')[1];
         const decompressed = LZString.decompressFromEncodedURIComponent(hashData);
         const parsed = JSON.parse(decompressed);
         
+        TestRunner.assertEqual(parsed.month, 0);
+        TestRunner.assertEqual(parsed.year, 2025);
         TestRunner.assertEqual(parsed.instructors[0].name, 'ShareTest');
         TestRunner.assertEqual(parsed.schedule['2025-01-01'].beginners.description, 'Test class');
         TestRunner.assertEqual(parsed.classDays.length, 3);
         TestRunner.assertTrue('2025-01-03' in parsed.cancelledDays);
+        TestRunner.assertTrue(parsed.viewOnly);
     });
 }
 

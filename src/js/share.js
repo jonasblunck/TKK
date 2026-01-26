@@ -396,12 +396,52 @@ const LZString = (function() {
 // SHARE LINK GENERATION
 // ============================================
 
+// Track if we're in view-only mode (opened from a share link)
+let isViewOnlyMode = false;
+
 function getShareableState() {
+    // Only include schedule data for the current month
+    const monthPrefix = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-`;
+    
+    // Filter schedule to only current month
+    const monthSchedule = {};
+    for (const dateStr in state.schedule) {
+        if (dateStr.startsWith(monthPrefix)) {
+            monthSchedule[dateStr] = state.schedule[dateStr];
+        }
+    }
+    
+    // Filter cancelledDays to only current month
+    const monthCancelledDays = {};
+    for (const dateStr in state.cancelledDays) {
+        if (dateStr.startsWith(monthPrefix)) {
+            monthCancelledDays[dateStr] = state.cancelledDays[dateStr];
+        }
+    }
+    
+    // Only include instructors that are assigned in this month's schedule
+    const assignedInstructorIds = new Set();
+    for (const dateStr in monthSchedule) {
+        const dayData = monthSchedule[dateStr];
+        for (const group of GROUPS) {
+            if (dayData[group]?.instructorId) {
+                assignedInstructorIds.add(dayData[group].instructorId);
+            }
+        }
+    }
+    
+    const monthInstructors = state.instructors
+        .filter(i => assignedInstructorIds.has(i.id))
+        .map(i => ({ id: i.id, name: i.name })); // Only need id and name for display
+    
     return {
-        instructors: state.instructors,
-        schedule: state.schedule,
+        month: state.currentMonth,
+        year: state.currentYear,
+        instructors: monthInstructors,
+        schedule: monthSchedule,
         classDays: state.classDays,
-        cancelledDays: state.cancelledDays
+        cancelledDays: monthCancelledDays,
+        viewOnly: true
     };
 }
 
@@ -443,9 +483,22 @@ function loadStateFromUrl() {
             }
             const data = JSON.parse(json);
             
-            // Validate the data structure
+            // Set the month/year to display
+            if (typeof data.month === 'number') {
+                state.currentMonth = data.month;
+            }
+            if (typeof data.year === 'number') {
+                state.currentYear = data.year;
+            }
+            
+            // Load instructors (minimal data for display)
             if (data.instructors && Array.isArray(data.instructors)) {
-                state.instructors = data.instructors;
+                state.instructors = data.instructors.map(i => ({
+                    id: i.id,
+                    name: i.name,
+                    groups: i.groups || [],
+                    availableDates: i.availableDates || []
+                }));
             }
             if (data.schedule && typeof data.schedule === 'object') {
                 state.schedule = data.schedule;
@@ -457,7 +510,13 @@ function loadStateFromUrl() {
                 state.cancelledDays = data.cancelledDays;
             }
             
-            // Clear the hash to avoid re-loading on refresh
+            // Enable view-only mode if specified
+            if (data.viewOnly) {
+                isViewOnlyMode = true;
+                applyViewOnlyMode();
+            }
+            
+            // Clear the hash to clean up the URL (but keep view-only mode active)
             history.replaceState(null, '', window.location.pathname);
             
             return true;
@@ -468,6 +527,17 @@ function loadStateFromUrl() {
         }
     }
     return false;
+}
+
+function applyViewOnlyMode() {
+    // Add a class to the body for CSS styling
+    document.body.classList.add('view-only-mode');
+    
+    // Update the header title to indicate shared view
+    const header = document.querySelector('.header h1');
+    if (header) {
+        header.textContent = 'Shared Schedule (View Only)';
+    }
 }
 
 async function copyToClipboard(text) {
@@ -500,6 +570,11 @@ async function openShareModal() {
     const shortUrlSection = document.getElementById('shortUrlSection');
     const shortenBtn = document.getElementById('btnShortenUrl');
     const shortenStatus = document.getElementById('shortenStatus');
+    const shareDescription = document.getElementById('shareDescription');
+    
+    // Update description with current month
+    const monthName = MONTH_NAMES[state.currentMonth];
+    shareDescription.textContent = `Share this link to let others view the ${monthName} ${state.currentYear} schedule. They'll see a read-only view.`;
     
     // Generate the long URL
     const longUrl = generateShareUrl();
