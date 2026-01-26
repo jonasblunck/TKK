@@ -26,3 +26,28 @@ function showToast(message, type = 'success') {
         toast.classList.remove('active');
     }, 3000);
 }
+
+function exportScheduleAsImage() {
+    const calendarElement = document.getElementById('calendarGrid');
+    const monthName = MONTH_NAMES[state.currentMonth];
+    const year = state.currentYear;
+    
+    showToast('Generating image...', 'success');
+    
+    html2canvas(calendarElement, {
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher resolution
+        logging: false
+    }).then(canvas => {
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `schedule-${monthName}-${year}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        showToast('Schedule exported!', 'success');
+    }).catch(err => {
+        console.error('Export failed:', err);
+        showToast('Export failed. Try again.', 'error');
+    });
+}

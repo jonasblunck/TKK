@@ -10,6 +10,28 @@ document.addEventListener('DOMContentLoaded', () => {
     renderInstructorList();
     renderCalendar();
     
+    // Actions dropdown toggle
+    const actionsDropdown = document.getElementById('btnActionsDropdown');
+    const actionsMenu = document.getElementById('actionsMenu');
+    
+    actionsDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        actionsMenu.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+        actionsMenu.classList.remove('active');
+    });
+    
+    // Prevent dropdown from closing when clicking inside menu
+    actionsMenu.addEventListener('click', (e) => {
+        // Only keep open for checkbox toggle, close for buttons
+        if (e.target.type !== 'checkbox') {
+            actionsMenu.classList.remove('active');
+        }
+    });
+    
     // Add instructor buttons
     document.getElementById('btnAddInstructor').addEventListener('click', openAddInstructorModal);
     document.getElementById('btnAddFirstInstructor')?.addEventListener('click', openAddInstructorModal);
@@ -110,6 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
             clearSchedule();
         }
     });
+    
+    // Export schedule as image
+    document.getElementById('btnExport').addEventListener('click', exportScheduleAsImage);
     
     // Save state
     document.getElementById('btnSave').addEventListener('click', saveState);

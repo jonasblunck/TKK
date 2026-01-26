@@ -493,6 +493,56 @@
             background: #f0f0f0;
         }
 
+        /* === Dropdown Menu === */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 180px;
+            z-index: 100;
+            padding: 6px 0;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .dropdown-item:hover {
+            background: #f5f5f5;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 6px 0;
+        }
+
         /* === Modal === */
         .modal-overlay {
             display: none;
@@ -694,15 +744,24 @@
         <header class="header">
             <h1>Instructor Scheduler</h1>
             <div class="header-actions">
-                <button class="btn btn-icon" id="btnHelp" title="Help">❓</button>
-                <button class="btn btn-icon" id="btnConfigDays" title="Configure class days">📅</button>
-                <label class="toggle-label" style="display: flex; align-items: center; gap: 6px; color: white; font-size: 0.85rem;">
-                    <input type="checkbox" id="toggleAllDays"> Show all days
-                </label>
-                <button class="btn btn-secondary" id="btnStats">📊 Stats</button>
-                <button class="btn btn-secondary" id="btnClearSchedule">🗑️ Clear</button>
-                <button class="btn btn-secondary" id="btnSave">💾 Save</button>
-                <button class="btn btn-primary" id="btnAutoGenerate">Auto-Generate Schedule</button>
+                <button class="btn btn-secondary" id="btnHelp" title="Help">❓ Help</button>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" id="btnActionsDropdown">⚙️ Actions ▾</button>
+                    <div class="dropdown-menu" id="actionsMenu">
+                        <button class="dropdown-item" id="btnAutoGenerate">▶️ Generate Schedule</button>
+                        <button class="dropdown-item" id="btnSave">💾 Save</button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" id="btnConfigDays">📅 Configure Class Days</button>
+                        <button class="dropdown-item" id="btnStats">📊 Statistics</button>
+                        <button class="dropdown-item" id="btnExport">📷 Export as Image</button>
+                        <div class="dropdown-divider"></div>
+                        <label class="dropdown-item" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="toggleAllDays"> Show all days
+                        </label>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" id="btnClearSchedule">🗑️ Clear Schedule</button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -883,6 +942,7 @@
                         <li><strong>Statistics:</strong> View instructor assignment stats for the current month.</li>
                         <li><strong>Save:</strong> Save your schedule to preserve it across sessions.</li>
                         <li><strong>Clear:</strong> Reset the schedule for the current month.</li>
+                        <li><strong>Export (📷):</strong> Download the calendar as a PNG image for easy sharing.</li>
                     </ul>
                 </section>
             </div>
@@ -891,6 +951,9 @@
             </div>
         </div>
     </div>
+
+    <!-- html2canvas for image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- JavaScript Modules -->
     <script src="js/constants.js"></script>

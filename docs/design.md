@@ -311,15 +311,3 @@ The help content is defined in `src/index.html` within the `#helpModal` element.
 
 This ensures users can discover and understand new functionality without external documentation.
 
----
-
-## Next Steps
-
-1. Review this design document
-2. Answer open questions if needed
-3. Run `generate-tasks.prompt.md` to create implementation tasks
-4. Implement MVP
-
----
-
-*Generated following the PRD workflow from `.github/prompts/prd-workflow/create-prd.prompt.md`*
