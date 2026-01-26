@@ -2,18 +2,21 @@
 // APP STATE
 // ============================================
 
+// Default instructors - used to ensure new instructors are added even when loading old saved data
+const DEFAULT_INSTRUCTORS = [
+    { id: 'default-1', name: 'JonasB', groups: [], availableDates: [] },
+    { id: 'default-2', name: 'JonasS', groups: [], availableDates: [] },
+    { id: 'default-3', name: 'Björn', groups: [], availableDates: [] },
+    { id: 'default-4', name: 'Daniel', groups: [], availableDates: [] },
+    { id: 'default-5', name: 'Stoffe', groups: [], availableDates: [] },
+    { id: 'default-6', name: 'Ida', groups: [], availableDates: [] },
+    { id: 'default-7', name: 'Ola', groups: [], availableDates: [] },
+    { id: 'default-8', name: 'Mike', groups: [], availableDates: [] }
+];
+
 const state = {
     // Instructors: array of { id, name, groups: [], availableDates: [] }
-    instructors: [
-        { id: 'default-1', name: 'JonasB', groups: [], availableDates: [] },
-        { id: 'default-2', name: 'JonasS', groups: [], availableDates: [] },
-        { id: 'default-3', name: 'Björn', groups: [], availableDates: [] },
-        { id: 'default-4', name: 'Daniel', groups: [], availableDates: [] },
-        { id: 'default-5', name: 'Stoffe', groups: [], availableDates: [] },
-        { id: 'default-6', name: 'Ida', groups: [], availableDates: [] },
-        { id: 'default-7', name: 'Ola', groups: [], availableDates: [] },
-        { id: 'default-8', name: 'Mike', groups: [], availableDates: [] }
-    ],
+    instructors: DEFAULT_INSTRUCTORS.map(i => ({ ...i })),
     
     // Schedule: { 'YYYY-MM-DD': { beginners: { instructorId, description }, ..., merges: [] } }
     schedule: {},
@@ -69,7 +72,18 @@ function loadState() {
         if (saved) {
             const data = JSON.parse(saved);
             
-            if (data.instructors) state.instructors = data.instructors;
+            if (data.instructors) {
+                state.instructors = data.instructors;
+                
+                // Merge in any new default instructors that aren't in the saved data
+                // This handles the case where new instructors were added after the user saved
+                for (const defaultInstructor of DEFAULT_INSTRUCTORS) {
+                    const exists = state.instructors.some(i => i.id === defaultInstructor.id);
+                    if (!exists) {
+                        state.instructors.push({ ...defaultInstructor });
+                    }
+                }
+            }
             if (data.schedule) state.schedule = data.schedule;
             if (data.classDays) state.classDays = data.classDays;
             if (data.cancelledDays) state.cancelledDays = data.cancelledDays;

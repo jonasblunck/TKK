@@ -646,8 +646,10 @@ function testStoragePersistence() {
         
         loadState();
         
-        TestRunner.assertEqual(state.instructors.length, 1);
-        TestRunner.assertEqual(state.instructors[0].name, 'Test');
+        // Should have saved instructor plus all default instructors merged in
+        const testInstructor = state.instructors.find(i => i.name === 'Test');
+        TestRunner.assertNotNull(testInstructor, 'Saved instructor should be restored');
+        TestRunner.assertEqual(testInstructor.name, 'Test');
         TestRunner.assertDeepEqual(state.classDays, [1, 3, 5]);
         TestRunner.assertTrue(state.cancelledDays['2025-01-09']);
     });
@@ -674,6 +676,44 @@ function testStoragePersistence() {
             errorThrown = true;
         }
         TestRunner.assertFalse(errorThrown);
+    });
+    
+    TestRunner.test('loadState includes new default instructors not in saved data', () => {
+        // Simulate old localStorage data that doesn't include a newly added instructor (e.g., Mike)
+        // This tests the case where an instructor was added to the default list after the user saved their data
+        const oldSavedData = {
+            instructors: [
+                { id: 'default-1', name: 'JonasB', groups: [], availableDates: [] },
+                { id: 'default-2', name: 'JonasS', groups: [], availableDates: [] },
+                { id: 'default-3', name: 'Björn', groups: [], availableDates: [] },
+                { id: 'default-4', name: 'Daniel', groups: [], availableDates: [] },
+                { id: 'default-5', name: 'Stoffe', groups: [], availableDates: [] },
+                { id: 'default-6', name: 'Ida', groups: [], availableDates: [] },
+                { id: 'default-7', name: 'Ola', groups: [], availableDates: [] }
+                // Note: Mike (default-8) is missing - simulating old data before Mike was added
+            ],
+            schedule: {},
+            classDays: [1, 4, 6],
+            cancelledDays: {}
+        };
+        
+        TestRunner.mockStorage[STORAGE_KEY] = JSON.stringify(oldSavedData);
+        
+        // Clear current state
+        state.instructors = [];
+        
+        loadState();
+        
+        // Check that Mike is present after loading
+        const mike = state.instructors.find(i => i.name === 'Mike');
+        TestRunner.assertNotNull(mike, 'New default instructor Mike should be present after loading old data');
+        
+        // Also verify that existing instructors are still there
+        const jonasB = state.instructors.find(i => i.name === 'JonasB');
+        TestRunner.assertNotNull(jonasB, 'Existing instructor JonasB should still be present');
+        
+        // Verify we have all 8 instructors
+        TestRunner.assertEqual(state.instructors.length, 8, 'Should have all 8 instructors including new ones');
     });
     
     restoreMock();
