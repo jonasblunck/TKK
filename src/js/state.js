@@ -10,7 +10,6 @@ const DEFAULT_INSTRUCTORS = [
     { id: 'default-4', name: 'Daniel', groups: [], availableDates: [] },
     { id: 'default-5', name: 'Stoffe', groups: [], availableDates: [] },
     { id: 'default-6', name: 'Ida', groups: [], availableDates: [] },
-    { id: 'default-7', name: 'Ola', groups: [], availableDates: [] },
     { id: 'default-8', name: 'Mike', groups: [], availableDates: [] }
 ];
 
