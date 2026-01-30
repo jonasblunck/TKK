@@ -181,13 +181,13 @@ function assignInstructor(dateStr, group, instructorId) {
 function assignInstructorWithoutRender(dateStr, group, instructorId) {
     if (!state.schedule[dateStr]) {
         state.schedule[dateStr] = {
-            beginners: { instructorId: null, description: '' },
-            children: { instructorId: null, description: '' },
-            adults: { instructorId: null, description: '' }
+            beginners: { instructorId: null, description: '', feedbackPoints: '' },
+            children: { instructorId: null, description: '', feedbackPoints: '' },
+            adults: { instructorId: null, description: '', feedbackPoints: '' }
         };
     }
     if (!state.schedule[dateStr][group]) {
-        state.schedule[dateStr][group] = { instructorId: null, description: '' };
+        state.schedule[dateStr][group] = { instructorId: null, description: '', feedbackPoints: '' };
     }
     state.schedule[dateStr][group].instructorId = instructorId;
 }
@@ -205,23 +205,26 @@ function unassignSlotWithoutRender(dateStr, group) {
     }
 }
 
-function setClassDescription(dateStr, group, description) {
+function setClassDescription(dateStr, group, description, feedbackPoints) {
     if (!state.schedule[dateStr]) {
         state.schedule[dateStr] = {
-            beginners: { instructorId: null, description: '' },
-            children: { instructorId: null, description: '' },
-            adults: { instructorId: null, description: '' }
+            beginners: { instructorId: null, description: '', feedbackPoints: '' },
+            children: { instructorId: null, description: '', feedbackPoints: '' },
+            adults: { instructorId: null, description: '', feedbackPoints: '' }
         };
     }
     if (!state.schedule[dateStr][group]) {
-        state.schedule[dateStr][group] = { instructorId: null, description: '' };
+        state.schedule[dateStr][group] = { instructorId: null, description: '', feedbackPoints: '' };
     }
     state.schedule[dateStr][group].description = description;
+    if (feedbackPoints !== undefined) {
+        state.schedule[dateStr][group].feedbackPoints = feedbackPoints;
+    }
     renderCalendar();
 }
 
 function getSlotData(dateStr, group) {
-    return state.schedule[dateStr]?.[group] || { instructorId: null, description: '' };
+    return state.schedule[dateStr]?.[group] || { instructorId: null, description: '', feedbackPoints: '' };
 }
 
 function getMerges(dateStr) {
@@ -231,9 +234,9 @@ function getMerges(dateStr) {
 function setMerges(dateStr, merges) {
     if (!state.schedule[dateStr]) {
         state.schedule[dateStr] = {
-            beginners: { instructorId: null, description: '' },
-            children: { instructorId: null, description: '' },
-            adults: { instructorId: null, description: '' },
+            beginners: { instructorId: null, description: '', feedbackPoints: '' },
+            children: { instructorId: null, description: '', feedbackPoints: '' },
+            adults: { instructorId: null, description: '', feedbackPoints: '' },
             merges: []
         };
     }

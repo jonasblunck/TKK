@@ -70,6 +70,7 @@ function openDescriptionModal(dateStr, group) {
     
     const slotData = getSlotData(dateStr, group);
     document.getElementById('classDescription').value = slotData.description || '';
+    document.getElementById('feedbackPoints').value = slotData.feedbackPoints || '';
     
     // Setup merge options based on which group is selected
     const mergeOptionsDiv = document.getElementById('mergeOptions');

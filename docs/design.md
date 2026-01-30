@@ -85,6 +85,18 @@ This is a **demo/prototype** - no authentication, no backend, session-only data 
 - Can still proceed with warning (override)
 - Can clear/unassign a cell
 
+### US-6: Add Class Details and Feedback Points
+
+> As an admin, I want to add focus areas and feedback points to each class slot, so that instructors know what to cover and what specific skills to provide feedback on.
+
+**Acceptance Criteria**:
+
+- Can double-click on any calendar cell to open the class details modal
+- Can enter a class focus/description (what the class will cover)
+- Can enter feedback points (specific areas instructors should focus their feedback on)
+- Feedback points are indicated with a 📝 icon in the calendar when present
+- Both fields are optional and can be edited at any time
+
 ---
 
 ## 4. Functional Requirements
@@ -147,6 +159,16 @@ This is a **demo/prototype** - no authentication, no backend, session-only data 
 22. The system must warn (not block) when a move or swap violates constraints
 
 23. The system must validate both instructors' constraints when performing a swap
+
+### FR-6: Class Details and Feedback
+
+24. The system must allow adding a focus/description to each class slot
+
+25. The system must allow adding feedback points to each class slot (specific areas for instructor feedback)
+
+26. The system must display a visual indicator (📝) when feedback points are present
+
+27. Both focus/description and feedback points must be saved with the schedule
 
 ---
 

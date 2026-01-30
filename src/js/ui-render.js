@@ -92,7 +92,9 @@ function renderCalendar() {
             const slotData = getSlotData(dateStr, group);
             const instructor = slotData.instructorId ? getInstructorById(slotData.instructorId) : null;
             const description = slotData.description || '';
+            const feedbackPoints = slotData.feedbackPoints || '';
             const hasDescription = description.trim().length > 0;
+            const hasFeedback = feedbackPoints.trim().length > 0;
             const mergedLabel = span > 1 ? getMergedGroupLabel(dateStr, group) : '';
             
             const spanClass = span > 1 ? `merged-span-${span}` : '';
@@ -124,10 +126,19 @@ function renderCalendar() {
                             : `<span class="unassigned">-</span>`
                         }
                         ${viewOnly 
-                            ? (hasDescription ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}">${description.length > 30 ? description.substring(0, 30) + '...' : description}</div>` : '')
-                            : (hasDescription 
-                                ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}" onclick="openDescriptionModal('${dateStr}', '${group}')">${description.length > 30 ? description.substring(0, 30) + '...' : description}</div>`
+                            ? (hasDescription 
+                                ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}">${description.length > 30 ? description.substring(0, 30) + '...' : description}</div>` 
+                                : '')
+                            : (hasDescription
+                                ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}" onclick="openDescriptionModal('${dateStr}', '${group}')">${description.length > 25 ? description.substring(0, 25) + '...' : description}</div>`
                                 : `<div class="cell-description add-desc" onclick="openDescriptionModal('${dateStr}', '${group}')">+ Add focus</div>`
+                            )
+                        }
+                        ${viewOnly
+                            ? (hasFeedback ? `<div class="cell-feedback">📝 ${feedbackPoints.replace(/\n/g, '<br>')}</div>` : '')
+                            : (hasFeedback 
+                                ? `<div class="cell-feedback" onclick="openDescriptionModal('${dateStr}', '${group}')">📝 ${feedbackPoints.replace(/\n/g, '<br>')}</div>`
+                                : ''
                             )
                         }
                     </div>

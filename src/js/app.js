@@ -195,7 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('descriptionForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const description = document.getElementById('classDescription').value.trim();
-        setClassDescription(state.editingDescriptionDate, state.editingDescriptionGroup, description);
+        const feedbackPoints = document.getElementById('feedbackPoints').value.trim();
+        setClassDescription(state.editingDescriptionDate, state.editingDescriptionGroup, description, feedbackPoints);
         
         // Handle merge options
         const group = state.editingDescriptionGroup;
