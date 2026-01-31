@@ -29,14 +29,31 @@ function showToast(message, type = 'success') {
 
 /**
  * Export the schedule as an image.
- * Prompts user whether to include feedback points.
+ * Shows modal asking whether to include feedback points.
  * Always hides surplus instructor indicators.
  */
 function exportScheduleAsImage() {
-    // Ask user about feedback points
-    const includeFeedback = confirm('Include feedback points (📝) in the exported image?\n\nClick OK to include, Cancel to hide them.');
-    
-    exportScheduleWithOptions({ includeFeedback });
+    // Show export options modal
+    const modal = document.getElementById('exportModal');
+    modal.classList.add('active');
+}
+
+/**
+ * Handle export with feedback points included.
+ */
+function handleExportWithFeedback() {
+    const modal = document.getElementById('exportModal');
+    modal.classList.remove('active');
+    exportScheduleWithOptions({ includeFeedback: true });
+}
+
+/**
+ * Handle export without feedback points.
+ */
+function handleExportWithoutFeedback() {
+    const modal = document.getElementById('exportModal');
+    modal.classList.remove('active');
+    exportScheduleWithOptions({ includeFeedback: false });
 }
 
 /**

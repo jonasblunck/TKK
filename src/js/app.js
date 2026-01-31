@@ -144,6 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Export schedule as image
     document.getElementById('btnExport').addEventListener('click', exportScheduleAsImage);
+    document.getElementById('btnExportYes').addEventListener('click', handleExportWithFeedback);
+    document.getElementById('btnExportNo').addEventListener('click', handleExportWithoutFeedback);
+    document.getElementById('exportModal').addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+    });
     
     // Save state
     document.getElementById('btnSave').addEventListener('click', saveState);
