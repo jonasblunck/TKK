@@ -57,12 +57,13 @@ function exportScheduleAsImage() {
 // ============================================
 
 /**
- * Get all instructors who are available on a given date but not yet assigned to any group.
+ * Get all instructors who are available on a given date but not yet assigned to any group
+ * (either as main instructor or assistant).
  * @param {string} dateStr - Date in 'YYYY-MM-DD' format
  * @returns {Array} Array of instructor objects who are available but unassigned
  */
 function getAvailableSurplusInstructors(dateStr) {
-    // Get all instructor IDs that are assigned to any group on this date
+    // Get all instructor IDs that are assigned to any group on this date (main or assistant)
     const assignedIds = new Set();
     const daySchedule = state.schedule[dateStr];
     
@@ -71,6 +72,10 @@ function getAvailableSurplusInstructors(dateStr) {
             const slotData = daySchedule[group];
             if (slotData?.instructorId) {
                 assignedIds.add(slotData.instructorId);
+            }
+            // Also include assistants
+            if (slotData?.assistants) {
+                slotData.assistants.forEach(id => assignedIds.add(id));
             }
         }
     }
@@ -81,7 +86,7 @@ function getAvailableSurplusInstructors(dateStr) {
         const isAvailable = instructor.availableDates.includes(dateStr);
         // Check if instructor can teach at least one group
         const canTeach = instructor.groups.length > 0;
-        // Check if instructor is not already assigned
+        // Check if instructor is not already assigned (main or assistant)
         const isNotAssigned = !assignedIds.has(instructor.id);
         
         return isAvailable && canTeach && isNotAssigned;

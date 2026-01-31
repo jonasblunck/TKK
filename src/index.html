@@ -287,6 +287,44 @@
             cursor: grab;
         }
 
+        .calendar-cell .assignment.main-instructor {
+            font-weight: 600;
+        }
+
+        /* === Instructors Row (Main + Assistants) === */
+        .instructors-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .calendar-cell .assistant {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #666;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .calendar-cell .assistant .remove-assistant {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0 2px;
+            line-height: 1;
+        }
+
+        .calendar-cell .assistant .remove-assistant:hover {
+            color: #c62828;
+        }
+
         .calendar-cell .unassigned {
             color: #999;
             font-style: italic;
@@ -1031,6 +1069,19 @@
         </div>
     </div>
 
+    <!-- Assistant Action Modal -->
+    <div class="modal-overlay" id="assistantModal">
+        <div class="modal" style="max-width: 400px;">
+            <h2>Assign Instructor</h2>
+            <p id="assistantModalText">This slot already has an instructor. What would you like to do?</p>
+            <div class="modal-actions" style="flex-direction: column; gap: 10px;">
+                <button type="button" class="btn btn-primary" id="btnReplaceInstructor">Replace Main Instructor</button>
+                <button type="button" class="btn btn-secondary" id="btnAddAssistant">Add as Assistant</button>
+                <button type="button" class="btn btn-secondary" id="btnCancelAssistant">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Help Modal -->
     <div class="modal-overlay" id="helpModal">
         <div class="modal" style="max-width: 650px;">
@@ -1051,6 +1102,8 @@
                     <ul>
                         <li><strong>Navigate Months:</strong> Use the arrow buttons to move between months.</li>
                         <li><strong>Drag & Drop:</strong> Drag instructors from the sidebar onto calendar slots to assign them.</li>
+                        <li><strong>Assistant Instructors:</strong> Drag an instructor onto an already-assigned slot to add them as an assistant. You'll be asked whether to replace or add as assistant.</li>
+                        <li><strong>Remove Assistant:</strong> Click the × button next to an assistant's name to remove them.</li>
                         <li><strong>Auto-Generate:</strong> Click "Auto-Generate Schedule" to automatically assign available instructors.</li>
                         <li><strong>Class Details:</strong> Double-click on a slot to add focus/description and feedback points, or merge groups.</li>
                         <li><strong>Feedback Points:</strong> Add specific feedback focus areas for instructors (📝 icon indicates feedback notes exist).</li>

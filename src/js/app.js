@@ -162,6 +162,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('modal-overlay')) closeHelpModal();
     });
     
+    // Assistant action modal
+    document.getElementById('btnReplaceInstructor').addEventListener('click', handleReplaceInstructor);
+    document.getElementById('btnAddAssistant').addEventListener('click', handleAddAssistant);
+    document.getElementById('btnCancelAssistant').addEventListener('click', hideAssistantModal);
+    document.getElementById('assistantModal').addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) hideAssistantModal();
+    });
+    
     // Share modal
     document.getElementById('btnShare').addEventListener('click', openShareModal);
     document.getElementById('btnCloseShare').addEventListener('click', closeShareModal);

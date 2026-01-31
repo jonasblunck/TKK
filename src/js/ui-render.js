@@ -104,6 +104,7 @@ function renderCalendar() {
             const span = getMergeSpan(dateStr, group);
             const slotData = getSlotData(dateStr, group);
             const instructor = slotData.instructorId ? getInstructorById(slotData.instructorId) : null;
+            const assistants = (slotData.assistants || []).map(id => getInstructorById(id)).filter(i => i);
             const description = slotData.description || '';
             const feedbackPoints = slotData.feedbackPoints || '';
             const hasDescription = description.trim().length > 0;
@@ -118,6 +119,21 @@ function renderCalendar() {
             const dragHandlers = viewOnly ? '' : `ondragover="handleDragOver(event)" ondrop="handleDrop(event)"`;
             const dblClickHandler = viewOnly ? '' : `ondblclick="openDescriptionModal('${dateStr}', '${group}')"`;
             
+            // Build assistants HTML
+            let assistantsHtml = '';
+            if (assistants.length > 0) {
+                assistantsHtml = assistants.map(asst => {
+                    if (viewOnly) {
+                        return `<span class="assistant">${asst.name}</span>`;
+                    } else {
+                        return `<span class="assistant">
+                            ${asst.name}
+                            <button class="remove-assistant" onclick="handleRemoveAssistant(event, '${dateStr}', '${group}', '${asst.id}')" title="Remove assistant">×</button>
+                        </span>`;
+                    }
+                }).join('');
+            }
+            
             html += `
                 <div class="calendar-cell ${group}-col ${spanClass} ${viewOnly ? 'view-only' : ''}" 
                      data-date="${dateStr}" 
@@ -126,18 +142,21 @@ function renderCalendar() {
                      ${dblClickHandler}>
                     <div class="cell-content">
                         ${span > 1 ? `<span class="merge-indicator">${mergedLabel}</span>` : ''}
-                        ${instructor 
-                            ? viewOnly 
-                                ? `<span class="assignment">${instructor.name}</span>`
-                                : `<span class="assignment" 
-                                    draggable="true" 
-                                    data-instructor-id="${instructor.id}"
-                                    data-source-date="${dateStr}"
-                                    data-source-group="${group}"
-                                    ondragstart="handleAssignmentDragStart(event)"
-                                    onclick="handleAssignmentClick(event, '${dateStr}', '${group}')">${instructor.name}</span>`
-                            : `<span class="unassigned">-</span>`
-                        }
+                        <div class="instructors-row">
+                            ${instructor 
+                                ? viewOnly 
+                                    ? `<span class="assignment main-instructor">${instructor.name}</span>`
+                                    : `<span class="assignment main-instructor" 
+                                        draggable="true" 
+                                        data-instructor-id="${instructor.id}"
+                                        data-source-date="${dateStr}"
+                                        data-source-group="${group}"
+                                        ondragstart="handleAssignmentDragStart(event)"
+                                        onclick="handleAssignmentClick(event, '${dateStr}', '${group}')">${instructor.name}</span>`
+                                : `<span class="unassigned">-</span>`
+                            }
+                            ${assistantsHtml}
+                        </div>
                         ${viewOnly 
                             ? (hasDescription 
                                 ? `<div class="cell-description" title="${description.replace(/"/g, '&quot;')}">${description.length > 30 ? description.substring(0, 30) + '...' : description}</div>` 

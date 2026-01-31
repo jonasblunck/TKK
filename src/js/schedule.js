@@ -166,13 +166,17 @@ function clearSchedule() {
 function assignInstructor(dateStr, group, instructorId) {
     if (!state.schedule[dateStr]) {
         state.schedule[dateStr] = {
-            beginners: { instructorId: null, description: '' },
-            children: { instructorId: null, description: '' },
-            adults: { instructorId: null, description: '' }
+            beginners: { instructorId: null, description: '', feedbackPoints: '', assistants: [] },
+            children: { instructorId: null, description: '', feedbackPoints: '', assistants: [] },
+            adults: { instructorId: null, description: '', feedbackPoints: '', assistants: [] }
         };
     }
     if (!state.schedule[dateStr][group]) {
-        state.schedule[dateStr][group] = { instructorId: null, description: '' };
+        state.schedule[dateStr][group] = { instructorId: null, description: '', feedbackPoints: '', assistants: [] };
+    }
+    // Ensure assistants array exists (for legacy data)
+    if (!state.schedule[dateStr][group].assistants) {
+        state.schedule[dateStr][group].assistants = [];
     }
     state.schedule[dateStr][group].instructorId = instructorId;
     renderCalendar();
@@ -181,20 +185,78 @@ function assignInstructor(dateStr, group, instructorId) {
 function assignInstructorWithoutRender(dateStr, group, instructorId) {
     if (!state.schedule[dateStr]) {
         state.schedule[dateStr] = {
-            beginners: { instructorId: null, description: '', feedbackPoints: '' },
-            children: { instructorId: null, description: '', feedbackPoints: '' },
-            adults: { instructorId: null, description: '', feedbackPoints: '' }
+            beginners: { instructorId: null, description: '', feedbackPoints: '', assistants: [] },
+            children: { instructorId: null, description: '', feedbackPoints: '', assistants: [] },
+            adults: { instructorId: null, description: '', feedbackPoints: '', assistants: [] }
         };
     }
     if (!state.schedule[dateStr][group]) {
-        state.schedule[dateStr][group] = { instructorId: null, description: '', feedbackPoints: '' };
+        state.schedule[dateStr][group] = { instructorId: null, description: '', feedbackPoints: '', assistants: [] };
+    }
+    // Ensure assistants array exists (for legacy data)
+    if (!state.schedule[dateStr][group].assistants) {
+        state.schedule[dateStr][group].assistants = [];
     }
     state.schedule[dateStr][group].instructorId = instructorId;
+}
+
+/**
+ * Add an assistant instructor to a slot.
+ * @param {string} dateStr - Date in 'YYYY-MM-DD' format
+ * @param {string} group - Group name (beginners, children, adults)
+ * @param {string} instructorId - The instructor ID to add as assistant
+ */
+function addAssistant(dateStr, group, instructorId) {
+    if (!state.schedule[dateStr]) {
+        state.schedule[dateStr] = {
+            beginners: { instructorId: null, description: '', feedbackPoints: '', assistants: [] },
+            children: { instructorId: null, description: '', feedbackPoints: '', assistants: [] },
+            adults: { instructorId: null, description: '', feedbackPoints: '', assistants: [] }
+        };
+    }
+    if (!state.schedule[dateStr][group]) {
+        state.schedule[dateStr][group] = { instructorId: null, description: '', feedbackPoints: '', assistants: [] };
+    }
+    if (!state.schedule[dateStr][group].assistants) {
+        state.schedule[dateStr][group].assistants = [];
+    }
+    // Don't add if already an assistant or is the main instructor
+    if (!state.schedule[dateStr][group].assistants.includes(instructorId) && 
+        state.schedule[dateStr][group].instructorId !== instructorId) {
+        state.schedule[dateStr][group].assistants.push(instructorId);
+    }
+    renderCalendar();
+}
+
+/**
+ * Remove an assistant instructor from a slot.
+ * @param {string} dateStr - Date in 'YYYY-MM-DD' format
+ * @param {string} group - Group name (beginners, children, adults)
+ * @param {string} instructorId - The instructor ID to remove
+ */
+function removeAssistant(dateStr, group, instructorId) {
+    if (state.schedule[dateStr]?.[group]?.assistants) {
+        state.schedule[dateStr][group].assistants = 
+            state.schedule[dateStr][group].assistants.filter(id => id !== instructorId);
+        renderCalendar();
+    }
+}
+
+/**
+ * Get the list of assistant instructors for a slot.
+ * @param {string} dateStr - Date in 'YYYY-MM-DD' format
+ * @param {string} group - Group name (beginners, children, adults)
+ * @returns {Array} Array of instructor IDs
+ */
+function getAssistants(dateStr, group) {
+    return state.schedule[dateStr]?.[group]?.assistants || [];
 }
 
 function unassignSlot(dateStr, group) {
     if (state.schedule[dateStr] && state.schedule[dateStr][group]) {
         state.schedule[dateStr][group].instructorId = null;
+        // Keep assistants when unassigning main instructor? For now, clear them too
+        // state.schedule[dateStr][group].assistants = [];
         renderCalendar();
     }
 }
@@ -224,7 +286,10 @@ function setClassDescription(dateStr, group, description, feedbackPoints) {
 }
 
 function getSlotData(dateStr, group) {
-    return state.schedule[dateStr]?.[group] || { instructorId: null, description: '', feedbackPoints: '' };
+    const slot = state.schedule[dateStr]?.[group] || { instructorId: null, description: '', feedbackPoints: '', assistants: [] };
+    // Ensure assistants array exists for legacy data
+    if (!slot.assistants) slot.assistants = [];
+    return slot;
 }
 
 function getMerges(dateStr) {
