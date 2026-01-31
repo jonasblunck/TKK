@@ -17,6 +17,9 @@ const state = {
     // Instructors: array of { id, name, groups: [], availableDates: [] }
     instructors: DEFAULT_INSTRUCTORS.map(i => ({ ...i })),
     
+    // Track deleted default instructor IDs (so they don't get re-added on load)
+    deletedDefaultIds: [],
+    
     // Schedule: { 'YYYY-MM-DD': { beginners: { instructorId, description }, ..., merges: [] } }
     schedule: {},
     
@@ -53,7 +56,8 @@ function saveState() {
         instructors: state.instructors,
         schedule: state.schedule,
         classDays: state.classDays,
-        cancelledDays: state.cancelledDays
+        cancelledDays: state.cancelledDays,
+        deletedDefaultIds: state.deletedDefaultIds
     };
     
     try {
@@ -73,16 +77,21 @@ function loadState() {
             
             if (data.instructors) {
                 state.instructors = data.instructors;
-                
-                // Merge in any new default instructors that aren't in the saved data
-                // This handles the case where new instructors were added after the user saved
-                for (const defaultInstructor of DEFAULT_INSTRUCTORS) {
-                    const exists = state.instructors.some(i => i.id === defaultInstructor.id);
-                    if (!exists) {
-                        state.instructors.push({ ...defaultInstructor });
-                    }
+            }
+            if (data.deletedDefaultIds) {
+                state.deletedDefaultIds = data.deletedDefaultIds;
+            }
+            
+            // Merge in any new default instructors that aren't in the saved data
+            // BUT skip ones that were explicitly deleted by the user
+            for (const defaultInstructor of DEFAULT_INSTRUCTORS) {
+                const exists = state.instructors.some(i => i.id === defaultInstructor.id);
+                const wasDeleted = state.deletedDefaultIds.includes(defaultInstructor.id);
+                if (!exists && !wasDeleted) {
+                    state.instructors.push({ ...defaultInstructor });
                 }
             }
+            
             if (data.schedule) state.schedule = data.schedule;
             if (data.classDays) state.classDays = data.classDays;
             if (data.cancelledDays) state.cancelledDays = data.cancelledDays;

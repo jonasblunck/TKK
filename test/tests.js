@@ -900,6 +900,290 @@ function testShareLink() {
     });
 }
 
+function testAssistantInstructors() {
+    TestRunner.suite('Assistant Instructors');
+    
+    TestRunner.resetStateForTest();
+    
+    // Temporarily silence UI updates
+    window.renderInstructorList = silentRender;
+    window.renderCalendar = silentRender;
+    window.showToast = silentShowToast;
+    
+    // Add test instructors
+    const mainInstructor = addInstructor('Main Teacher', ['beginners', 'adults'], ['2025-01-06']);
+    const assistant1 = addInstructor('Assistant One', ['beginners'], ['2025-01-06']);
+    const assistant2 = addInstructor('Assistant Two', ['beginners', 'adults'], ['2025-01-06']);
+    
+    TestRunner.test('addAssistant adds assistant to slot', () => {
+        assignInstructor('2025-01-06', 'beginners', mainInstructor.id);
+        addAssistant('2025-01-06', 'beginners', assistant1.id);
+        
+        const slotData = getSlotData('2025-01-06', 'beginners');
+        TestRunner.assertEqual(slotData.instructorId, mainInstructor.id);
+        TestRunner.assertTrue(slotData.assistants.includes(assistant1.id));
+        TestRunner.assertEqual(slotData.assistants.length, 1);
+    });
+    
+    TestRunner.test('addAssistant can add multiple assistants', () => {
+        addAssistant('2025-01-06', 'beginners', assistant2.id);
+        
+        const slotData = getSlotData('2025-01-06', 'beginners');
+        TestRunner.assertEqual(slotData.assistants.length, 2);
+        TestRunner.assertTrue(slotData.assistants.includes(assistant1.id));
+        TestRunner.assertTrue(slotData.assistants.includes(assistant2.id));
+    });
+    
+    TestRunner.test('addAssistant does not add duplicate assistant', () => {
+        addAssistant('2025-01-06', 'beginners', assistant1.id); // Already added
+        
+        const slotData = getSlotData('2025-01-06', 'beginners');
+        TestRunner.assertEqual(slotData.assistants.length, 2); // Still 2
+    });
+    
+    TestRunner.test('addAssistant does not add main instructor as assistant', () => {
+        addAssistant('2025-01-06', 'beginners', mainInstructor.id); // Main instructor
+        
+        const slotData = getSlotData('2025-01-06', 'beginners');
+        TestRunner.assertEqual(slotData.assistants.length, 2); // Still 2, not 3
+        TestRunner.assertFalse(slotData.assistants.includes(mainInstructor.id));
+    });
+    
+    TestRunner.test('removeAssistant removes specific assistant', () => {
+        removeAssistant('2025-01-06', 'beginners', assistant1.id);
+        
+        const slotData = getSlotData('2025-01-06', 'beginners');
+        TestRunner.assertEqual(slotData.assistants.length, 1);
+        TestRunner.assertFalse(slotData.assistants.includes(assistant1.id));
+        TestRunner.assertTrue(slotData.assistants.includes(assistant2.id));
+    });
+    
+    TestRunner.test('getAssistants returns assistant list', () => {
+        const assistants = getAssistants('2025-01-06', 'beginners');
+        TestRunner.assertEqual(assistants.length, 1);
+        TestRunner.assertTrue(assistants.includes(assistant2.id));
+    });
+    
+    TestRunner.test('getAssistants returns empty array for slot without assistants', () => {
+        const assistants = getAssistants('2025-01-06', 'adults'); // No schedule here
+        TestRunner.assertEqual(assistants.length, 0);
+    });
+    
+    TestRunner.test('getSlotData returns assistants array for legacy data', () => {
+        // Simulate legacy data without assistants array
+        state.schedule['2025-01-07'] = {
+            beginners: { instructorId: mainInstructor.id, description: 'Legacy' }
+            // No assistants field
+        };
+        
+        const slotData = getSlotData('2025-01-07', 'beginners');
+        TestRunner.assertNotNull(slotData.assistants);
+        TestRunner.assertEqual(slotData.assistants.length, 0);
+    });
+    
+    TestRunner.test('replacing main instructor preserves assistants', () => {
+        // Setup: main instructor with assistant
+        state.schedule['2025-01-08'] = {
+            beginners: { instructorId: mainInstructor.id, description: '', feedbackPoints: '', assistants: [assistant1.id] }
+        };
+        
+        // Replace main instructor
+        assignInstructor('2025-01-08', 'beginners', assistant2.id);
+        
+        const slotData = getSlotData('2025-01-08', 'beginners');
+        TestRunner.assertEqual(slotData.instructorId, assistant2.id); // New main
+        TestRunner.assertEqual(slotData.assistants.length, 1); // Assistants preserved
+        TestRunner.assertTrue(slotData.assistants.includes(assistant1.id));
+    });
+    
+    TestRunner.test('deleteInstructor removes from assistants', () => {
+        // Setup: slot with assistant
+        state.schedule['2025-01-09'] = {
+            beginners: { instructorId: mainInstructor.id, description: '', feedbackPoints: '', assistants: [assistant1.id, assistant2.id] },
+            children: { instructorId: null, description: '', feedbackPoints: '', assistants: [] },
+            adults: { instructorId: null, description: '', feedbackPoints: '', assistants: [] }
+        };
+        
+        // Delete assistant1
+        deleteInstructor(assistant1.id);
+        
+        const slotData = getSlotData('2025-01-09', 'beginners');
+        TestRunner.assertFalse(slotData.assistants.includes(assistant1.id));
+        TestRunner.assertTrue(slotData.assistants.includes(assistant2.id));
+    });
+}
+
+function testSurplusInstructors() {
+    TestRunner.suite('Surplus Instructor Calculation');
+    
+    TestRunner.resetStateForTest();
+    
+    // Temporarily silence UI updates
+    window.renderInstructorList = silentRender;
+    window.renderCalendar = silentRender;
+    window.showToast = silentShowToast;
+    
+    // Add test instructors
+    const instructor1 = addInstructor('Teacher A', ['beginners'], ['2025-01-06']);
+    const instructor2 = addInstructor('Teacher B', ['beginners', 'children'], ['2025-01-06']);
+    const instructor3 = addInstructor('Teacher C', ['beginners', 'adults'], ['2025-01-06']);
+    const unavailable = addInstructor('Not Available', ['beginners'], ['2025-01-07']); // Different day
+    
+    TestRunner.test('getAvailableSurplusInstructors returns all available when none assigned', () => {
+        const surplus = getAvailableSurplusInstructors('2025-01-06');
+        TestRunner.assertEqual(surplus.length, 3); // instructor1, 2, 3 (not unavailable)
+    });
+    
+    TestRunner.test('getAvailableSurplusInstructors excludes assigned main instructors', () => {
+        assignInstructor('2025-01-06', 'beginners', instructor1.id);
+        
+        const surplus = getAvailableSurplusInstructors('2025-01-06');
+        TestRunner.assertEqual(surplus.length, 2);
+        TestRunner.assertFalse(surplus.some(i => i.id === instructor1.id));
+    });
+    
+    TestRunner.test('getAvailableSurplusInstructors excludes assistant instructors', () => {
+        addAssistant('2025-01-06', 'beginners', instructor2.id);
+        
+        const surplus = getAvailableSurplusInstructors('2025-01-06');
+        TestRunner.assertEqual(surplus.length, 1);
+        TestRunner.assertFalse(surplus.some(i => i.id === instructor2.id));
+        TestRunner.assertTrue(surplus.some(i => i.id === instructor3.id));
+    });
+    
+    TestRunner.test('getSurplusInstructorCount returns correct count', () => {
+        const count = getSurplusInstructorCount('2025-01-06');
+        TestRunner.assertEqual(count, 1); // Only instructor3 left
+    });
+    
+    TestRunner.test('getAvailableSurplusInstructors returns empty for unavailable date', () => {
+        const surplus = getAvailableSurplusInstructors('2025-01-10'); // No one available
+        TestRunner.assertEqual(surplus.length, 0);
+    });
+}
+
+function testExportFunctionality() {
+    TestRunner.suite('Export Functionality');
+    
+    TestRunner.resetStateForTest();
+    
+    // Temporarily silence UI updates
+    window.renderInstructorList = silentRender;
+    window.renderCalendar = silentRender;
+    window.showToast = silentShowToast;
+    
+    // Setup: create a mock calendar with elements to test
+    const mockCalendar = document.createElement('div');
+    mockCalendar.id = 'testCalendarGrid';
+    mockCalendar.innerHTML = `
+        <div class="calendar-cell date-cell">
+            Mon 6 
+            <span class="surplus-indicator">👥 +2</span>
+            <button class="cancel-btn">❌</button>
+        </div>
+        <div class="calendar-cell beginners-col">
+            <div class="cell-content">
+                <div class="instructors-row">
+                    <span class="assignment main-instructor">Teacher</span>
+                    <span class="assistant">Assistant <button class="remove-assistant">×</button></span>
+                </div>
+                <div class="cell-description add-desc">+ Add focus</div>
+                <div class="cell-feedback">📝 Feedback notes here</div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(mockCalendar);
+    
+    TestRunner.test('prepareCalendarForExport hides surplus indicators', () => {
+        const surplusIndicator = mockCalendar.querySelector('.surplus-indicator');
+        TestRunner.assertEqual(surplusIndicator.style.display, '');
+        
+        const restore = prepareCalendarForExport({ includeFeedback: true });
+        TestRunner.assertEqual(surplusIndicator.style.display, 'none');
+        
+        restore();
+        TestRunner.assertEqual(surplusIndicator.style.display, '');
+    });
+    
+    TestRunner.test('prepareCalendarForExport hides cancel buttons', () => {
+        const cancelBtn = mockCalendar.querySelector('.cancel-btn');
+        
+        const restore = prepareCalendarForExport({ includeFeedback: true });
+        TestRunner.assertEqual(cancelBtn.style.display, 'none');
+        
+        restore();
+    });
+    
+    TestRunner.test('prepareCalendarForExport hides add-desc elements', () => {
+        const addDesc = mockCalendar.querySelector('.add-desc');
+        
+        const restore = prepareCalendarForExport({ includeFeedback: true });
+        TestRunner.assertEqual(addDesc.style.display, 'none');
+        
+        restore();
+    });
+    
+    TestRunner.test('prepareCalendarForExport hides remove-assistant buttons', () => {
+        const removeBtn = mockCalendar.querySelector('.remove-assistant');
+        
+        const restore = prepareCalendarForExport({ includeFeedback: true });
+        TestRunner.assertEqual(removeBtn.style.display, 'none');
+        
+        restore();
+    });
+    
+    TestRunner.test('prepareCalendarForExport keeps feedback when includeFeedback is true', () => {
+        const feedback = mockCalendar.querySelector('.cell-feedback');
+        
+        const restore = prepareCalendarForExport({ includeFeedback: true });
+        TestRunner.assertTrue(feedback.style.display !== 'none');
+        
+        restore();
+    });
+    
+    TestRunner.test('prepareCalendarForExport hides feedback when includeFeedback is false', () => {
+        const feedback = mockCalendar.querySelector('.cell-feedback');
+        
+        const restore = prepareCalendarForExport({ includeFeedback: false });
+        TestRunner.assertEqual(feedback.style.display, 'none');
+        
+        restore();
+        TestRunner.assertEqual(feedback.style.display, '');
+    });
+    
+    TestRunner.test('prepareCalendarForExport returns working restore function', () => {
+        const surplusIndicator = mockCalendar.querySelector('.surplus-indicator');
+        const cancelBtn = mockCalendar.querySelector('.cancel-btn');
+        const feedback = mockCalendar.querySelector('.cell-feedback');
+        
+        // Hide elements
+        const restore = prepareCalendarForExport({ includeFeedback: false });
+        
+        TestRunner.assertEqual(surplusIndicator.style.display, 'none');
+        TestRunner.assertEqual(cancelBtn.style.display, 'none');
+        TestRunner.assertEqual(feedback.style.display, 'none');
+        
+        // Restore
+        restore();
+        
+        TestRunner.assertEqual(surplusIndicator.style.display, '');
+        TestRunner.assertEqual(cancelBtn.style.display, '');
+        TestRunner.assertEqual(feedback.style.display, '');
+    });
+    
+    TestRunner.test('prepareCalendarForExport with default options includes feedback', () => {
+        const feedback = mockCalendar.querySelector('.cell-feedback');
+        
+        const restore = prepareCalendarForExport(); // Default options
+        TestRunner.assertTrue(feedback.style.display !== 'none');
+        
+        restore();
+    });
+    
+    // Cleanup
+    document.body.removeChild(mockCalendar);
+}
+
 // ============================================
 // MAIN TEST RUNNER
 // ============================================
@@ -922,6 +1206,9 @@ function runAllTests() {
         testStoragePersistence();
         testAutoGenerate();
         testShareLink();
+        testAssistantInstructors();
+        testSurplusInstructors();
+        testExportFunctionality();
     } finally {
         TestRunner.restoreState();
     }

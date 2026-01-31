@@ -27,10 +27,52 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+/**
+ * Export the schedule as an image.
+ * Prompts user whether to include feedback points.
+ * Always hides surplus instructor indicators.
+ */
 function exportScheduleAsImage() {
+    // Ask user about feedback points
+    const includeFeedback = confirm('Include feedback points (📝) in the exported image?\n\nClick OK to include, Cancel to hide them.');
+    
+    exportScheduleWithOptions({ includeFeedback });
+}
+
+/**
+ * Export schedule with specific options.
+ * @param {Object} options - Export options
+ * @param {boolean} options.includeFeedback - Whether to include feedback points
+ */
+function exportScheduleWithOptions(options = {}) {
+    const { includeFeedback = true } = options;
+    
     const calendarElement = document.getElementById('calendarGrid');
     const monthName = MONTH_NAMES[state.currentMonth];
     const year = state.currentYear;
+    
+    // Temporarily hide elements for export
+    const elementsToHide = [];
+    
+    // Always hide surplus indicators
+    document.querySelectorAll('.surplus-indicator').forEach(el => {
+        elementsToHide.push({ el, display: el.style.display });
+        el.style.display = 'none';
+    });
+    
+    // Hide feedback points if user opted out
+    if (!includeFeedback) {
+        document.querySelectorAll('.cell-feedback').forEach(el => {
+            elementsToHide.push({ el, display: el.style.display });
+            el.style.display = 'none';
+        });
+    }
+    
+    // Hide interactive elements (cancel buttons, add focus buttons)
+    document.querySelectorAll('.cancel-btn, .add-desc, .remove-assistant').forEach(el => {
+        elementsToHide.push({ el, display: el.style.display });
+        el.style.display = 'none';
+    });
     
     showToast('Generating image...', 'success');
     
@@ -39,6 +81,11 @@ function exportScheduleAsImage() {
         scale: 2, // Higher resolution
         logging: false
     }).then(canvas => {
+        // Restore hidden elements
+        elementsToHide.forEach(({ el, display }) => {
+            el.style.display = display;
+        });
+        
         // Create download link
         const link = document.createElement('a');
         link.download = `schedule-${monthName}-${year}.png`;
@@ -47,9 +94,53 @@ function exportScheduleAsImage() {
         
         showToast('Schedule exported!', 'success');
     }).catch(err => {
+        // Restore hidden elements on error too
+        elementsToHide.forEach(({ el, display }) => {
+            el.style.display = display;
+        });
+        
         console.error('Export failed:', err);
         showToast('Export failed. Try again.', 'error');
     });
+}
+
+/**
+ * Prepare calendar for export by hiding non-exportable elements.
+ * Returns a cleanup function to restore the elements.
+ * @param {Object} options - Export options
+ * @param {boolean} options.includeFeedback - Whether to include feedback points
+ * @returns {Function} Cleanup function to restore hidden elements
+ */
+function prepareCalendarForExport(options = {}) {
+    const { includeFeedback = true } = options;
+    const elementsToHide = [];
+    
+    // Always hide surplus indicators
+    document.querySelectorAll('.surplus-indicator').forEach(el => {
+        elementsToHide.push({ el, display: el.style.display });
+        el.style.display = 'none';
+    });
+    
+    // Hide feedback points if user opted out
+    if (!includeFeedback) {
+        document.querySelectorAll('.cell-feedback').forEach(el => {
+            elementsToHide.push({ el, display: el.style.display });
+            el.style.display = 'none';
+        });
+    }
+    
+    // Hide interactive elements
+    document.querySelectorAll('.cancel-btn, .add-desc, .remove-assistant').forEach(el => {
+        elementsToHide.push({ el, display: el.style.display });
+        el.style.display = 'none';
+    });
+    
+    // Return cleanup function
+    return function restoreCalendarAfterExport() {
+        elementsToHide.forEach(({ el, display }) => {
+            el.style.display = display;
+        });
+    };
 }
 
 // ============================================
