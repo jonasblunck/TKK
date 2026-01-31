@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Clear schedule
     document.getElementById('btnClearSchedule').addEventListener('click', () => {
-        if (confirm(`Clear all assignments for ${MONTH_NAMES[state.currentMonth]} ${state.currentYear}?\n\nThis will remove all instructor assignments but keep class descriptions.`)) {
+        if (confirm(`Clear all data for ${MONTH_NAMES[state.currentMonth]} ${state.currentYear}?\n\nThis will remove all instructor assignments, class descriptions, and restore cancelled days.`)) {
             clearSchedule();
         }
     });

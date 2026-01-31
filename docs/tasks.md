@@ -204,131 +204,141 @@
 
 ### Phase 7: Available Instructor Indicator
 
-**Status**: Not Started  
-**Progress**: 0/5 tasks complete (0%)  
-**Phase Started**: TBD  
-**Phase Completed**: TBD
+**Status**: Complete ✅  
+**Progress**: 5/5 tasks complete (100%)  
+**Phase Started**: 2026-01-31  
+**Phase Completed**: 2026-01-31
 
-- [ ] 7.0 Show visual indicator when surplus instructors are available
+- [x] 7.0 Show visual indicator when surplus instructors are available
   - **Relevant Documentation:**
     - [design.md](design.md) - FR-7 (Available Instructor Indicator), US-7 (See Available Instructor Surplus)
-  - [ ] 7.1 Create utility function to calculate available but unassigned instructors per day
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 7.2 Add indicator element (👥 icon) to day column in calendar grid HTML
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 7.3 Implement logic to show/hide indicator based on surplus count
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 7.4 Add tooltip on hover showing count and names of available instructors
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 7.5 Update indicator when assignments change (add, remove, drag-drop)
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
+  - [x] 7.1 Create utility function to calculate available but unassigned instructors per day
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~30 min
+  - [x] 7.2 Add indicator element (👥 icon) to day column in calendar grid HTML
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~15 min
+  - [x] 7.3 Implement logic to show/hide indicator based on surplus count
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~15 min
+  - [x] 7.4 Add hover behavior showing available instructors in sidebar
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~30 min
+  - [x] 7.5 Update indicator when assignments change (add, remove, drag-drop)
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~15 min
 
 ---
 
 ### Phase 8: Assistant Instructors
 
-**Status**: Not Started  
-**Progress**: 0/7 tasks complete (0%)  
-**Phase Started**: TBD  
-**Phase Completed**: TBD
+**Status**: Complete ✅  
+**Progress**: 7/7 tasks complete (100%)  
+**Phase Started**: 2026-01-31  
+**Phase Completed**: 2026-01-31
 
-- [ ] 8.0 Support multiple instructors per class (main + assistants)
+- [x] 8.0 Support multiple instructors per class (main + assistants)
   - **Relevant Documentation:**
     - [design.md](design.md) - FR-8 (Assistant Instructors), US-8 (Add Assistant Instructors to a Class)
-  - [ ] 8.1 Update data model to support main instructor and array of assistant instructors per slot
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 8.2 Modify drop handler to detect if target cell already has a main instructor
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 8.3 Implement prompt modal asking "Replace instructor" or "Add as assistant"
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 8.4 Update calendar cell rendering to show assistants to the right of main instructor
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 8.5 Add visual distinction between main instructor (bold) and assistants (regular/smaller)
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 8.6 Implement remove button (X) for individual assistant instructors
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 8.7 Ensure swapping main instructor preserves assigned assistants
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
+  - [x] 8.1 Update data model to support main instructor and array of assistant instructors per slot
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~20 min
+  - [x] 8.2 Modify drop handler to detect if target cell already has a main instructor
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~30 min
+  - [x] 8.3 Implement prompt modal asking "Replace instructor" or "Add as assistant"
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~45 min
+  - [x] 8.4 Update calendar cell rendering to show assistants to the right of main instructor
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~30 min
+  - [x] 8.5 Add visual distinction between main instructor (bold) and assistants (regular/smaller)
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~15 min
+  - [x] 8.6 Implement remove button (X) for individual assistant instructors
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~20 min
+  - [x] 8.7 Ensure swapping main instructor preserves assigned assistants
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~15 min
 
 ---
 
 ### Phase 9: Export Schedule Enhancements
 
-**Status**: Not Started  
-**Progress**: 0/5 tasks complete (0%)  
-**Phase Started**: TBD  
-**Phase Completed**: TBD
+**Status**: Complete ✅  
+**Progress**: 5/5 tasks complete (100%)  
+**Phase Started**: 2026-01-31  
+**Phase Completed**: 2026-01-31
 
-- [ ] 9.0 Enhance export functionality with options and clean output
+- [x] 9.0 Enhance export functionality with options and clean output
   - **Relevant Documentation:**
     - [design.md](design.md) - FR-9 (Export Schedule), US-9 (Export Schedule as Image)
-  - [ ] 9.1 Create export options modal/prompt asking whether to include feedback points
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 9.2 Modify export function to temporarily hide feedback points if user opts out
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 9.3 Modify export function to always hide surplus instructor indicator (👥) in exported image
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 9.4 Ensure exported image is clean and professional (remove interactive elements)
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
-  - [ ] 9.5 Test export with various combinations (with/without feedback, with/without surplus indicators)
-    - **Started**: TBD
-    - **Completed**: TBD
-    - **Duration**: TBD
+  - [x] 9.1 Create export options modal asking whether to include feedback points (Yes/No buttons)
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~20 min
+  - [x] 9.2 Modify export function to temporarily hide feedback points if user opts out
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~15 min
+  - [x] 9.3 Modify export function to always hide surplus instructor indicator (👥) in exported image
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~10 min
+  - [x] 9.4 Ensure exported image is clean and professional (remove interactive elements)
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~15 min
+  - [x] 9.5 Test export with various combinations (with/without feedback, with/without surplus indicators)
+    - **Started**: 2026-01-31
+    - **Completed**: 2026-01-31
+    - **Duration**: ~30 min (8 automated tests)
 
 ---
 
 ## Summary
 
-| Phase | Description | Tasks |
-|-------|-------------|-------|
-| 1 | Project Setup | 4 |
-| 2 | Instructor Management | 6 |
-| 3 | Calendar Display | 5 |
-| 4 | Auto-Generate Schedule | 5 |
-| 5 | Manual Adjustments | 5 |
-| 6 | Polish & Testing | 4 |
-| 7 | Available Instructor Indicator | 5 |
-| 8 | Assistant Instructors | 7 |
-| 9 | Export Schedule Enhancements | 5 |
-| **Total** | | **46** |
+| Phase | Description | Tasks | Status |
+|-------|-------------|-------|--------|
+| 1 | Project Setup | 4 | ✅ Complete |
+| 2 | Instructor Management | 6 | ✅ Complete |
+| 3 | Calendar Display | 5 | ✅ Complete |
+| 4 | Auto-Generate Schedule | 5 | ✅ Complete |
+| 5 | Manual Adjustments | 5 | ✅ Complete |
+| 6 | Polish & Testing | 4 | ✅ Complete |
+| 7 | Available Instructor Indicator | 5 | ✅ Complete |
+| 8 | Assistant Instructors | 7 | ✅ Complete |
+| 9 | Export Schedule Enhancements | 5 | ✅ Complete |
+| **Total** | | **46** | **All Complete** |
+
+---
+
+## Test Coverage
+
+- **75 unit tests** across 12 test files
+- Test suites: Utility, Instructors, Assignments, Merge, Schedule, Statistics, Storage, Autogenerate, Share, Assistants, Surplus, Export
 
 ---
 
 ## Next Steps
 
-Run `process-task-list.prompt.md` to execute tasks one sub-task at a time.
+All phases complete! Future enhancements could include:
+- Drag-to-reorder assistants
+- Bulk assignment tools
+- Calendar print styling
 
 ---
 
