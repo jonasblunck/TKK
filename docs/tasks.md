@@ -276,6 +276,39 @@
 
 ---
 
+### Phase 9: Export Schedule Enhancements
+
+**Status**: Not Started  
+**Progress**: 0/5 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 9.0 Enhance export functionality with options and clean output
+  - **Relevant Documentation:**
+    - [design.md](design.md) - FR-9 (Export Schedule), US-9 (Export Schedule as Image)
+  - [ ] 9.1 Create export options modal/prompt asking whether to include feedback points
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 9.2 Modify export function to temporarily hide feedback points if user opts out
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 9.3 Modify export function to always hide surplus instructor indicator (👥) in exported image
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 9.4 Ensure exported image is clean and professional (remove interactive elements)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 9.5 Test export with various combinations (with/without feedback, with/without surplus indicators)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
 ## Summary
 
 | Phase | Description | Tasks |
@@ -288,7 +321,8 @@
 | 6 | Polish & Testing | 4 |
 | 7 | Available Instructor Indicator | 5 |
 | 8 | Assistant Instructors | 7 |
-| **Total** | | **41** |
+| 9 | Export Schedule Enhancements | 5 |
+| **Total** | | **46** |
 
 ---
 

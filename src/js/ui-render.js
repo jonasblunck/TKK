@@ -74,11 +74,24 @@ function renderCalendar() {
             continue;
         }
         
+        // Calculate surplus instructors for this day
+        const surplusInstructors = getAvailableSurplusInstructors(dateStr);
+        const surplusCount = surplusInstructors.length;
+        const surplusNames = surplusInstructors.map(i => i.name).join(', ');
+        const surplusIds = surplusInstructors.map(i => i.id).join(',');
+        const surplusIndicator = surplusCount > 0 
+            ? `<span class="surplus-indicator" 
+                     title="${surplusCount} more available: ${surplusNames}" 
+                     data-surplus-ids="${surplusIds}"
+                     onmouseenter="highlightSurplusInstructors('${surplusIds}')"
+                     onmouseleave="clearSurplusHighlight()">👥 +${surplusCount}</span>` 
+            : '';
+        
         // In view-only mode, don't show the cancel button
         const cancelBtn = (typeof isViewOnlyMode !== 'undefined' && isViewOnlyMode) 
             ? '' 
             : `<button class="cancel-btn" onclick="cancelDay('${dateStr}')" title="Cancel this day">❌</button>`;
-        html += `<div class="calendar-cell date-cell">${dayName} ${day} ${cancelBtn}</div>`;
+        html += `<div class="calendar-cell date-cell">${dayName} ${day} ${surplusIndicator} ${cancelBtn}</div>`;
         
         for (const group of GROUPS) {
             const mergeInfo = isGroupMerged(dateStr, group);

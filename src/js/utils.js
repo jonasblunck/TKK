@@ -51,3 +51,78 @@ function exportScheduleAsImage() {
         showToast('Export failed. Try again.', 'error');
     });
 }
+
+// ============================================
+// AVAILABLE INSTRUCTOR SURPLUS
+// ============================================
+
+/**
+ * Get all instructors who are available on a given date but not yet assigned to any group.
+ * @param {string} dateStr - Date in 'YYYY-MM-DD' format
+ * @returns {Array} Array of instructor objects who are available but unassigned
+ */
+function getAvailableSurplusInstructors(dateStr) {
+    // Get all instructor IDs that are assigned to any group on this date
+    const assignedIds = new Set();
+    const daySchedule = state.schedule[dateStr];
+    
+    if (daySchedule) {
+        for (const group of GROUPS) {
+            const slotData = daySchedule[group];
+            if (slotData?.instructorId) {
+                assignedIds.add(slotData.instructorId);
+            }
+        }
+    }
+    
+    // Find instructors who are available on this date but not assigned
+    return state.instructors.filter(instructor => {
+        // Check if instructor is available on this date
+        const isAvailable = instructor.availableDates.includes(dateStr);
+        // Check if instructor can teach at least one group
+        const canTeach = instructor.groups.length > 0;
+        // Check if instructor is not already assigned
+        const isNotAssigned = !assignedIds.has(instructor.id);
+        
+        return isAvailable && canTeach && isNotAssigned;
+    });
+}
+
+/**
+ * Get the count of surplus instructors for a given date.
+ * @param {string} dateStr - Date in 'YYYY-MM-DD' format
+ * @returns {number} Count of available but unassigned instructors
+ */
+function getSurplusInstructorCount(dateStr) {
+    return getAvailableSurplusInstructors(dateStr).length;
+}
+
+/**
+ * Highlight instructor cards in the sidebar for the given instructor IDs.
+ * Hides instructors that are not in the surplus list.
+ * @param {string} idsString - Comma-separated instructor IDs
+ */
+function highlightSurplusInstructors(idsString) {
+    const ids = new Set(idsString.split(',').filter(id => id.trim()));
+    
+    // Show only the surplus instructors, hide others
+    document.querySelectorAll('.instructor-card').forEach(card => {
+        const instructorId = card.dataset.instructorId;
+        if (ids.has(instructorId)) {
+            card.classList.add('surplus-highlight');
+            card.classList.remove('surplus-hidden');
+        } else {
+            card.classList.add('surplus-hidden');
+            card.classList.remove('surplus-highlight');
+        }
+    });
+}
+
+/**
+ * Clear all surplus instructor highlights and show all instructors.
+ */
+function clearSurplusHighlight() {
+    document.querySelectorAll('.instructor-card').forEach(card => {
+        card.classList.remove('surplus-highlight', 'surplus-hidden');
+    });
+}

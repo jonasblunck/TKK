@@ -124,6 +124,18 @@ This is a **demo/prototype** - no authentication, no backend, session-only data 
 - Constraint validation still applies to assistant instructors (availability and group preferences)
 - Swapping the main instructor does not affect assigned assistants
 
+### US-9: Export Schedule as Image
+
+> As an admin, I want to export the schedule as an image file, so that I can easily share it via email, chat, or other channels without requiring recipients to access the app.
+
+**Acceptance Criteria**:
+
+- Can export the current month's calendar view as a PNG image
+- Before exporting, a prompt asks whether to include feedback points in the export
+- If user chooses to exclude feedback points, the exported image does not show them
+- The available instructor surplus indicator (👥) is never included in the exported image (internal planning info only)
+- The exported image is clean and suitable for professional sharing
+
 ---
 
 ## 4. Functional Requirements
@@ -222,6 +234,18 @@ This is a **demo/prototype** - no authentication, no backend, session-only data 
 37. The system must validate assistant instructor constraints (availability and group preferences) with warnings (not blocking)
 
 38. The system must preserve assistant instructors when the main instructor is swapped or replaced
+
+### FR-9: Export Schedule
+
+39. The system must allow exporting the calendar view as a PNG image
+
+40. The system must prompt the user before export to ask whether feedback points should be included
+
+41. The system must hide feedback points (📝 sections) in the export if the user chooses to exclude them
+
+42. The system must always hide the available instructor surplus indicator (👥) in exported images
+
+43. The exported image must be clean and professional, suitable for sharing externally
 
 ---
 
