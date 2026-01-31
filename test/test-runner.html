@@ -65,8 +65,25 @@
     <script src="../src/js/schedule.js"></script>
     <script src="../src/js/ui-modals.js"></script>
 
-    <!-- Load tests -->
-    <script src="tests.js"></script>
+    <!-- Load test utilities and framework -->
+    <script src="test-utils.js"></script>
+
+    <!-- Load individual test suites -->
+    <script src="tests/utility.test.js"></script>
+    <script src="tests/instructors.test.js"></script>
+    <script src="tests/assignments.test.js"></script>
+    <script src="tests/merge.test.js"></script>
+    <script src="tests/schedule.test.js"></script>
+    <script src="tests/statistics.test.js"></script>
+    <script src="tests/storage.test.js"></script>
+    <script src="tests/autogenerate.test.js"></script>
+    <script src="tests/share.test.js"></script>
+    <script src="tests/assistants.test.js"></script>
+    <script src="tests/surplus.test.js"></script>
+    <script src="tests/export.test.js"></script>
+
+    <!-- Load main test runner -->
+    <script src="tests-main.js"></script>
 
     <script>
         const output = document.getElementById('output');

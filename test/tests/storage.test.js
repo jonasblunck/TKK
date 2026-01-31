@@ -15,32 +15,46 @@ function testStorage() {
     state.currentYear = 2025;
     
     TestRunner.test('saveState stores data in localStorage', () => {
-        const instructor = addInstructor('Storage Test', ['beginners'], []);
+        // Clear localStorage first to ensure clean test
+        localStorage.removeItem(STORAGE_KEY);
+        TestRunner.resetStateForTest();
+        state.currentMonth = 5;
+        state.currentYear = 2025;
+        
+        const instructor = addInstructor('Storage Test', ['beginners'], ['2025-06-05']);
         state.schedule['2025-06-05'] = {
             beginners: { instructorId: instructor.id, description: 'Test' }
         };
         
         saveState();
         
-        const saved = localStorage.getItem('tkkState');
+        const saved = localStorage.getItem(STORAGE_KEY);
         TestRunner.assertTrue(saved !== null);
         
         const parsed = JSON.parse(saved);
-        TestRunner.assertEqual(parsed.instructors.length, state.instructors.length);
+        // Check that our instructor was saved
+        const foundInstructor = parsed.instructors.find(i => i.name === 'Storage Test');
+        TestRunner.assertTrue(foundInstructor !== undefined);
         TestRunner.assertTrue(parsed.schedule['2025-06-05'] !== undefined);
     });
     
     TestRunner.test('loadState restores data from localStorage', () => {
+        // Clear state first
+        TestRunner.resetStateForTest();
+        state.deletedDefaultIds = [];
+        
+        // Mark all defaults as deleted so we only get our test instructor
         const testData = {
-            instructors: [{ id: 'test-1', name: 'Loaded Instructor', groups: ['beginners'], daysOff: [], feedbackPoints: 0, createdAt: Date.now() }],
+            instructors: [{ id: 'test-1', name: 'Loaded Instructor', groups: ['beginners'], availableDates: [], feedbackPoints: 0 }],
             schedule: { '2025-06-10': { beginners: { instructorId: 'test-1', description: 'Loaded' } } },
             cancelledDays: { '2025-06-15': true },
             currentMonth: 5,
             currentYear: 2025,
-            classDays: [1, 4, 6]
+            classDays: [1, 4, 6],
+            deletedDefaultIds: DEFAULT_INSTRUCTORS.map(i => i.id) // Mark all defaults as deleted
         };
         
-        localStorage.setItem('tkkState', JSON.stringify(testData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(testData));
         loadState();
         
         TestRunner.assertEqual(state.instructors.length, 1);

@@ -115,6 +115,7 @@ const TestRunner = {
         state.currentYear = 2025;
         state.classDays = [1, 4, 6]; // Mon, Thu, Sat
         state.showAllDays = false;
+        state.deletedDefaultIds = [];
     },
     
     // Mock localStorage
@@ -143,18 +144,19 @@ const TestRunner = {
 };
 
 // Suppress toast notifications during tests
-const originalShowToast = typeof showToast === 'function' ? showToast : () => {};
 const silentShowToast = () => {};
 
 // Suppress renderCalendar during tests
-const originalRenderCalendar = typeof renderCalendar === 'function' ? renderCalendar : () => {};
-const originalRenderInstructorList = typeof renderInstructorList === 'function' ? renderInstructorList : () => {};
 const silentRender = () => {};
 
-// Export for browser
-window.TestRunner = TestRunner;
-window.originalShowToast = originalShowToast;
-window.silentShowToast = silentShowToast;
-window.originalRenderCalendar = originalRenderCalendar;
-window.originalRenderInstructorList = originalRenderInstructorList;
-window.silentRender = silentRender;
+// Export for browser - these will be set after app loads
+if (typeof window !== 'undefined') {
+    window.TestRunner = TestRunner;
+    window.silentShowToast = silentShowToast;
+    window.silentRender = silentRender;
+    
+    // Store original functions - will be set after app loads
+    window.originalShowToast = typeof showToast === 'function' ? showToast : () => {};
+    window.originalRenderCalendar = typeof renderCalendar === 'function' ? renderCalendar : () => {};
+    window.originalRenderInstructorList = typeof renderInstructorList === 'function' ? renderInstructorList : () => {};
+}
