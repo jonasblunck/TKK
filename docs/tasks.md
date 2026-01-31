@@ -2,6 +2,7 @@
 
 > **Design Document**: [design.md](design.md)
 > **Generated**: 2025-12-18 by jonasblunck
+> **Updated**: 2026-01-31 by jonasblunck
 
 ---
 
@@ -201,6 +202,80 @@
 
 ---
 
+### Phase 7: Available Instructor Indicator
+
+**Status**: Not Started  
+**Progress**: 0/5 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 7.0 Show visual indicator when surplus instructors are available
+  - **Relevant Documentation:**
+    - [design.md](design.md) - FR-7 (Available Instructor Indicator), US-7 (See Available Instructor Surplus)
+  - [ ] 7.1 Create utility function to calculate available but unassigned instructors per day
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 7.2 Add indicator element (👥 icon) to day column in calendar grid HTML
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 7.3 Implement logic to show/hide indicator based on surplus count
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 7.4 Add tooltip on hover showing count and names of available instructors
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 7.5 Update indicator when assignments change (add, remove, drag-drop)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
+### Phase 8: Assistant Instructors
+
+**Status**: Not Started  
+**Progress**: 0/7 tasks complete (0%)  
+**Phase Started**: TBD  
+**Phase Completed**: TBD
+
+- [ ] 8.0 Support multiple instructors per class (main + assistants)
+  - **Relevant Documentation:**
+    - [design.md](design.md) - FR-8 (Assistant Instructors), US-8 (Add Assistant Instructors to a Class)
+  - [ ] 8.1 Update data model to support main instructor and array of assistant instructors per slot
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 8.2 Modify drop handler to detect if target cell already has a main instructor
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 8.3 Implement prompt modal asking "Replace instructor" or "Add as assistant"
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 8.4 Update calendar cell rendering to show assistants to the right of main instructor
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 8.5 Add visual distinction between main instructor (bold) and assistants (regular/smaller)
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 8.6 Implement remove button (X) for individual assistant instructors
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+  - [ ] 8.7 Ensure swapping main instructor preserves assigned assistants
+    - **Started**: TBD
+    - **Completed**: TBD
+    - **Duration**: TBD
+
+---
+
 ## Summary
 
 | Phase | Description | Tasks |
@@ -211,7 +286,9 @@
 | 4 | Auto-Generate Schedule | 5 |
 | 5 | Manual Adjustments | 5 |
 | 6 | Polish & Testing | 4 |
-| **Total** | | **29** |
+| 7 | Available Instructor Indicator | 5 |
+| 8 | Assistant Instructors | 7 |
+| **Total** | | **41** |
 
 ---
 

@@ -2,7 +2,7 @@
 
 > **Purpose**: A minimal local scheduling app for assigning instructors to training groups based on availability.
 
-**Last Updated**: 2026-01-09 by jonasblunck
+**Last Updated**: 2026-01-31 by jonasblunck
 
 ---
 
@@ -97,6 +97,33 @@ This is a **demo/prototype** - no authentication, no backend, session-only data 
 - Feedback points are indicated with a 📝 icon in the calendar when present
 - Both fields are optional and can be edited at any time
 
+### US-7: See Available Instructor Surplus
+
+> As an admin, I want to see at a glance which days have more available instructors than currently assigned, so that I can identify scheduling flexibility or opportunities to add assistant instructors.
+
+**Acceptance Criteria**:
+
+- Each day row displays an indicator when unassigned instructors are still available
+- Indicator shows a visual icon (e.g., 👥 or ➕) in the day column
+- Hovering over the indicator shows a tooltip with the count of additional available instructors
+- Indicator only appears when at least one instructor is available but not yet assigned to any group that day
+
+### US-8: Add Assistant Instructors to a Class
+
+> As an admin, I want to add one or more assistant instructors to a class alongside the main instructor, so that classes requiring more support have adequate staffing.
+
+**Acceptance Criteria**:
+
+- When dragging an instructor onto a slot that already has an instructor assigned, a prompt appears asking whether to:
+  - **Replace** the current instructor (existing behavior)
+  - **Add as assistant** (new behavior)
+- Assistant instructors are displayed to the right of the main instructor in the calendar cell
+- Visual distinction between main instructor and assistants (e.g., main instructor in bold, assistants in regular text or with a smaller font)
+- Can remove individual assistant instructors without affecting the main instructor
+- Can have multiple assistant instructors per class (no hard limit)
+- Constraint validation still applies to assistant instructors (availability and group preferences)
+- Swapping the main instructor does not affect assigned assistants
+
 ---
 
 ## 4. Functional Requirements
@@ -170,6 +197,32 @@ This is a **demo/prototype** - no authentication, no backend, session-only data 
 
 27. Both focus/description and feedback points must be saved with the schedule
 
+### FR-7: Available Instructor Indicator
+
+28. The system must calculate the number of available instructors per day who are not assigned to any group
+
+29. The system must display a visual indicator (👥 or ➕) in the day column when surplus instructors are available
+
+30. The system must show the count of additional available instructors on hover (tooltip)
+
+31. The indicator must only appear when at least one unassigned instructor is available for that day
+
+### FR-8: Assistant Instructors
+
+32. The system must support multiple instructors per class slot (one main instructor + zero or more assistants)
+
+33. When dropping an instructor onto an occupied slot, the system must prompt the user to choose between replacing the main instructor or adding as assistant
+
+34. The system must display assistant instructors to the right of the main instructor in the calendar cell
+
+35. The system must visually distinguish between main instructor and assistant instructors (e.g., bold vs regular text, size difference, or separator)
+
+36. The system must allow removing individual assistant instructors independently
+
+37. The system must validate assistant instructor constraints (availability and group preferences) with warnings (not blocking)
+
+38. The system must preserve assistant instructors when the main instructor is swapped or replaced
+
 ---
 
 ## 5. Non-Goals (Out of Scope)
@@ -204,14 +257,19 @@ The following are explicitly **NOT** included in this version:
 +------------------------+-------------------------+
 |  INSTRUCTORS           |  JANUARY 2025           |
 |------------------------|-------------------------|
-|  • Alice               |  Date | Beg | Int | Adv |
-|    Jan 6-10, 13-17     |-------|-----|-----|-----|
-|    [Beg] [Int]         |  Mon 6| Bob |Alice|     |
-|                        |  Tue 7|Alice| Bob | Bob |
-|  • Bob                 |  Wed 8| Bob |Alice|Alice|
-|    Jan 6-31            |  ...  |     |     |     |
-|    [Beg] [Int] [Adv]   |  Fri31| Bob |Alice| Bob |
+|  • Alice               |      | Beg | Int | Adv  |
+|    Jan 6-10, 13-17     |------|-----|-----|------|
+|    [Beg] [Int]         |Mon 6 | Bob |Alice|      |
+|                        |Tue 7 |Alice| Bob | Bob  |
+|  • Bob                 |Wed 8👥| Bob |Alice|Alice |
+|    Jan 6-31            |      |     |+Carl|      |
+|    [Beg] [Int] [Adv]   |  ... |     |     |      |
+|                        |Fri31 | Bob |Alice| Bob  |
 +------------------------+-------------------------+
+
+Legend:
+- 👥 = Additional instructors available (hover for count)
+- +Carl = Assistant instructor (shown to right/below main)
 ```
 
 ### Color Coding
@@ -226,6 +284,9 @@ The following are explicitly **NOT** included in this version:
 - **Edit Instructor**: Click on instructor in list
 - **Drag-and-Drop**: Drag instructor name between calendar cells
 - **Clear Assignment**: Click "X" on assigned cell or drag to trash
+- **Add Assistant**: Drag instructor to occupied cell → prompt appears → choose "Add as Assistant"
+- **Remove Assistant**: Click "X" next to assistant name in cell
+- **Available Surplus**: Hover over 👥 icon to see tooltip with count of available instructors
 
 ---
 
