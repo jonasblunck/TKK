@@ -91,13 +91,19 @@ function exportScheduleWithOptions(options = {}) {
         el.style.display = 'none';
     });
     
+    // Apply export mode for larger fonts and higher contrast
+    calendarElement.classList.add('export-mode');
+    
     showToast('Generating image...', 'success');
     
     html2canvas(calendarElement, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher resolution
+        scale: 3, // Higher resolution for better readability when shared
         logging: false
     }).then(canvas => {
+        // Remove export mode
+        calendarElement.classList.remove('export-mode');
+        
         // Restore hidden elements
         elementsToHide.forEach(({ el, display }) => {
             el.style.display = display;
@@ -111,6 +117,9 @@ function exportScheduleWithOptions(options = {}) {
         
         showToast('Schedule exported!', 'success');
     }).catch(err => {
+        // Remove export mode
+        calendarElement.classList.remove('export-mode');
+        
         // Restore hidden elements on error too
         elementsToHide.forEach(({ el, display }) => {
             el.style.display = display;
