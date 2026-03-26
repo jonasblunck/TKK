@@ -555,6 +555,51 @@ function isInViewOnlyMode() {
     return isViewOnlyMode;
 }
 
+/**
+ * In view-only mode, render the calendar as a static image.
+ * This gives mobile users native pinch-to-zoom and scroll.
+ */
+function renderViewOnlyAsImage() {
+    const calendarElement = document.getElementById('calendarGrid');
+    if (!calendarElement) return;
+    
+    // Hide interactive elements before capture
+    document.querySelectorAll('.surplus-indicator, .cancel-btn, .add-desc, .remove-assistant').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Apply export mode for better readability
+    calendarElement.classList.add('export-mode');
+    
+    html2canvas(calendarElement, {
+        backgroundColor: '#ffffff',
+        scale: 3,
+        logging: false
+    }).then(canvas => {
+        const calendarArea = document.querySelector('.calendar-area');
+        if (!calendarArea) return;
+        
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        img.style.display = 'block';
+        img.alt = 'Schedule';
+        
+        // Keep the calendar header (month/year title), replace the grid with the image
+        const calendarHeader = calendarArea.querySelector('.calendar-header');
+        calendarArea.innerHTML = '';
+        if (calendarHeader) {
+            calendarArea.appendChild(calendarHeader);
+        }
+        calendarArea.appendChild(img);
+    }).catch(err => {
+        console.error('Failed to render view-only image:', err);
+        // Fall back to the normal HTML view
+        calendarElement.classList.remove('export-mode');
+    });
+}
+
 async function copyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);

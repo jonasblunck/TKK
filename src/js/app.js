@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     renderCalendar();
     
+    // In view-only mode, convert calendar to a static image for easy mobile viewing
+    if (typeof isViewOnlyMode !== 'undefined' && isViewOnlyMode) {
+        renderViewOnlyAsImage();
+    }
+    
     // Actions dropdown toggle
     const actionsDropdown = document.getElementById('btnActionsDropdown');
     const actionsMenu = document.getElementById('actionsMenu');
