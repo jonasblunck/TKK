@@ -561,7 +561,8 @@ function isInViewOnlyMode() {
  */
 function renderViewOnlyAsImage() {
     const calendarElement = document.getElementById('calendarGrid');
-    if (!calendarElement) return;
+    const calendarArea = document.querySelector('.calendar-area');
+    if (!calendarElement || !calendarArea) return;
     
     // Hide interactive elements before capture
     document.querySelectorAll('.surplus-indicator, .cancel-btn, .add-desc, .remove-assistant').forEach(el => {
@@ -571,13 +572,26 @@ function renderViewOnlyAsImage() {
     // Apply export mode for better readability
     calendarElement.classList.add('export-mode');
     
+    // Temporarily expand the container so html2canvas captures the full grid,
+    // even on narrow mobile viewports where 1fr columns would shrink
+    const appContainer = document.querySelector('.app-container');
+    const savedAppMinWidth = appContainer ? appContainer.style.minWidth : '';
+    const savedAreaOverflow = calendarArea.style.overflow;
+    const savedAreaMinWidth = calendarArea.style.minWidth;
+    if (appContainer) appContainer.style.minWidth = '1200px';
+    calendarArea.style.overflow = 'visible';
+    calendarArea.style.minWidth = '1100px';
+    
     html2canvas(calendarElement, {
         backgroundColor: '#ffffff',
         scale: 3,
-        logging: false
+        logging: false,
+        windowWidth: 1200
     }).then(canvas => {
-        const calendarArea = document.querySelector('.calendar-area');
-        if (!calendarArea) return;
+        // Restore container styles
+        if (appContainer) appContainer.style.minWidth = savedAppMinWidth;
+        calendarArea.style.overflow = savedAreaOverflow;
+        calendarArea.style.minWidth = savedAreaMinWidth;
         
         const img = document.createElement('img');
         img.src = canvas.toDataURL('image/png');
@@ -595,7 +609,10 @@ function renderViewOnlyAsImage() {
         calendarArea.appendChild(img);
     }).catch(err => {
         console.error('Failed to render view-only image:', err);
-        // Fall back to the normal HTML view
+        // Restore container styles and fall back to normal HTML view
+        if (appContainer) appContainer.style.minWidth = savedAppMinWidth;
+        calendarArea.style.overflow = savedAreaOverflow;
+        calendarArea.style.minWidth = savedAreaMinWidth;
         calendarElement.classList.remove('export-mode');
     });
 }
