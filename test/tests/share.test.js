@@ -106,6 +106,39 @@ function testShareLink() {
         TestRunner.assertEqual(parsed.classDays[1], 5);
     });
     
+    TestRunner.test('Share link works with summer month groups (children + adults only)', () => {
+        TestRunner.resetStateForTest();
+        state.currentMonth = 6; // July (summer)
+        state.currentYear = 2025;
+        state.classDays = [1, 4, 6];
+        
+        const inst1 = addInstructor('Summer Inst 1', ['children'], ['2025-07-07']);
+        const inst2 = addInstructor('Summer Inst 2', ['adults'], ['2025-07-07']);
+        state.schedule['2025-07-07'] = {
+            children: { instructorId: inst1.id, description: 'Kids class' },
+            adults: { instructorId: inst2.id, description: 'Adult class' }
+        };
+        
+        // Generate share URL
+        const link = generateShareUrl();
+        const encodedData = link.split('?s=')[1];
+        const decoded = LZString.decompressFromEncodedURIComponent(encodedData);
+        const parsed = JSON.parse(decoded);
+        
+        // Verify month is preserved
+        TestRunner.assertEqual(parsed.month, 6);
+        // Verify both instructors are included
+        TestRunner.assertEqual(parsed.instructors.length, 2);
+        // Verify schedule data is correct
+        TestRunner.assertEqual(parsed.schedule['2025-07-07'].children.instructorId, inst1.id);
+        TestRunner.assertEqual(parsed.schedule['2025-07-07'].adults.instructorId, inst2.id);
+        // Verify getGroupsForMonth returns only 2 groups for July
+        const groups = getGroupsForMonth(parsed.month);
+        TestRunner.assertEqual(groups.length, 2);
+        TestRunner.assertEqual(groups[0], 'children');
+        TestRunner.assertEqual(groups[1], 'adults');
+    });
+    
     window.renderCalendar = originalRenderCalendar;
     window.renderInstructorList = originalRenderInstructorList;
     window.showToast = originalShowToast;

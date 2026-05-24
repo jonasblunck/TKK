@@ -167,8 +167,7 @@ function calculateStats() {
         
         if (merges.length > 0) mergedDays++;
         
-        for (const group of GROUPS) {
-            // Skip if this group is merged into another
+        for (const group of getGroupsForMonth(month)) {
             const mergeInfo = isGroupMerged(dateStr, group);
             if (mergeInfo.merged) continue;
             

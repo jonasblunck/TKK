@@ -142,7 +142,7 @@ function validateInstructorAssignment(instructor, targetDate, targetGroup, isAss
     
     // Check for double-booking on same day
     const daySchedule = state.schedule[targetDate] || {};
-    for (const group of GROUPS) {
+    for (const group of ALL_GROUPS) {
         if (group !== targetGroup) {
             if (daySchedule[group]?.instructorId === instructor.id) {
                 warnings.push(`${instructor.name} is already assigned to ${GROUP_LABELS[group]} on this day`);
@@ -186,7 +186,7 @@ function performDropAction(targetDate, targetGroup, action) {
         
         // Check for double-booking of swapped instructor on source day
         const sourceDaySchedule = state.schedule[dragSourceDate] || {};
-        for (const group of GROUPS) {
+        for (const group of ALL_GROUPS) {
             if (group !== dragSourceGroup && sourceDaySchedule[group]?.instructorId === existingInstructorId) {
                 if (!(targetDate === dragSourceDate && targetGroup === group)) {
                     warnings.push(`${existingInstructor.name} is already assigned to ${GROUP_LABELS[group]} on ${dragSourceDate}`);

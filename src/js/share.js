@@ -423,7 +423,7 @@ function getShareableState() {
     const assignedInstructorIds = new Set();
     for (const dateStr in monthSchedule) {
         const dayData = monthSchedule[dateStr];
-        for (const group of GROUPS) {
+        for (const group of ALL_GROUPS) {
             if (dayData[group]?.instructorId) {
                 assignedInstructorIds.add(dayData[group].instructorId);
             }

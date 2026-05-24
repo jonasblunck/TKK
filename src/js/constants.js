@@ -2,7 +2,13 @@
 // CONSTANTS
 // ============================================
 
-const GROUPS = ['beginners', 'children', 'adults'];
+const ALL_GROUPS = ['beginners', 'children', 'adults'];
+const SUMMER_GROUPS = ['children', 'adults'];
+const SUMMER_MONTHS = [5, 6, 7]; // June, July, August (0-indexed)
+
+function getGroupsForMonth(month) {
+    return SUMMER_MONTHS.includes(month) ? SUMMER_GROUPS : ALL_GROUPS;
+}
 
 const GROUP_LABELS = {
     beginners: 'Beginners',

@@ -36,7 +36,7 @@ function deleteInstructor(id) {
     state.instructors = state.instructors.filter(i => i.id !== id);
     // Remove from schedule (main instructor)
     for (const date in state.schedule) {
-        for (const group of GROUPS) {
+        for (const group of ALL_GROUPS) {
             if (state.schedule[date][group]?.instructorId === id) {
                 state.schedule[date][group].instructorId = null;
             }

@@ -58,7 +58,7 @@ function testStatistics() {
         // Jan 6 (Mon) and Jan 9 (Thu) have assignments
         // So 13 - 2 = 11 days with no assignments × 3 groups = 33 unassigned
         // Plus 1 unassigned on Jan 9 (adults) = 34 unassigned
-        const expectedUnassigned = (daysInMonth - 2) * GROUPS.length + 1;
+        const expectedUnassigned = (daysInMonth - 2) * getGroupsForMonth(state.currentMonth).length + 1;
         TestRunner.assertEqual(unassignedSlots, expectedUnassigned);
     });
     

@@ -45,7 +45,7 @@ function autoGenerateSchedule() {
     // Build a list of all available slots (dateStr + group combinations)
     const allSlots = [];
     for (const { dateStr } of classDaysToSchedule) {
-        for (const group of GROUPS) {
+        for (const group of getGroupsForMonth(month)) {
             allSlots.push({ dateStr, group });
         }
     }
@@ -98,7 +98,7 @@ function autoGenerateSchedule() {
     // PASS 2: Fill remaining slots with fair distribution
     for (const { dateStr } of classDaysToSchedule) {
         // Shuffle group order to avoid always prioritizing the same group
-        const shuffledGroups = [...GROUPS].sort(() => Math.random() - 0.5);
+        const shuffledGroups = [...getGroupsForMonth(month)].sort(() => Math.random() - 0.5);
         
         for (const group of shuffledGroups) {
             const slotKey = `${dateStr}|${group}`;

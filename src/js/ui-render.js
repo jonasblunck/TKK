@@ -50,13 +50,13 @@ function renderCalendar() {
     // Update month header
     document.getElementById('currentMonth').textContent = `${MONTH_NAMES[month]} ${year}`;
     
-    // Build grid HTML
-    let html = `
-        <div class="calendar-cell header">Date</div>
-        <div class="calendar-cell header beginners-col">Beginners</div>
-        <div class="calendar-cell header children-col">Children</div>
-        <div class="calendar-cell header adults-col">Adults</div>
-    `;
+    // Build grid HTML - groups depend on month
+    const groups = getGroupsForMonth(month);
+    container.style.gridTemplateColumns = `100px repeat(${groups.length}, 1fr)`;
+    let html = `<div class="calendar-cell header">Date</div>`;
+    for (const group of groups) {
+        html += `<div class="calendar-cell header ${group}-col">${GROUP_LABELS[group]}</div>`;
+    }
     
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = formatDate(year, month, day);
@@ -93,7 +93,7 @@ function renderCalendar() {
             : `<button class="cancel-btn" onclick="cancelDay('${dateStr}')" title="Cancel this day">❌</button>`;
         html += `<div class="calendar-cell date-cell">${dayName} ${day} ${surplusIndicator} ${cancelBtn}</div>`;
         
-        for (const group of GROUPS) {
+        for (const group of groups) {
             const mergeInfo = isGroupMerged(dateStr, group);
             
             // Skip rendering if this group is merged into another
