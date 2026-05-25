@@ -167,9 +167,10 @@ function calculateStats() {
         
         if (merges.length > 0) mergedDays++;
         
-        for (const group of getGroupsForMonth(month)) {
+        const groups = getGroupsForMonth(month);
+        for (const group of groups) {
             const mergeInfo = isGroupMerged(dateStr, group);
-            if (mergeInfo.merged) continue;
+            if (mergeInfo.merged && groups.includes(mergeInfo.primary)) continue;
             
             const slotData = getSlotData(dateStr, group);
             if (slotData.instructorId) {

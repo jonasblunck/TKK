@@ -97,7 +97,8 @@ function renderCalendar() {
             const mergeInfo = isGroupMerged(dateStr, group);
             
             // Skip rendering if this group is merged into another
-            if (mergeInfo.merged) {
+            // (only if the primary group is actually in the active groups list)
+            if (mergeInfo.merged && groups.includes(mergeInfo.primary)) {
                 continue;
             }
             
