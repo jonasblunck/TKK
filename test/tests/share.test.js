@@ -147,22 +147,12 @@ function testShareLink() {
     TestRunner.test('shortenUrl returns short URL on success', async () => {
         window.fetch = async () => ({
             ok: true,
-            text: async () => 'https://tinyurl.com/abc123'
+            json: async () => ({ result_url: 'https://cleanuri.com/abc123' })
         });
 
         const result = await shortenUrl('https://example.com/very/long/url');
         TestRunner.assertTrue(result.success);
-        TestRunner.assertEqual(result.shortUrl, 'https://tinyurl.com/abc123');
-    });
-
-    TestRunner.test('shortenUrl trims whitespace from response', async () => {
-        window.fetch = async () => ({
-            ok: true,
-            text: async () => '  https://tinyurl.com/abc123\n'
-        });
-
-        const result = await shortenUrl('https://example.com');
-        TestRunner.assertEqual(result.shortUrl, 'https://tinyurl.com/abc123');
+        TestRunner.assertEqual(result.shortUrl, 'https://cleanuri.com/abc123');
     });
 
     TestRunner.test('shortenUrl returns failure on HTTP error', async () => {
@@ -170,7 +160,7 @@ function testShareLink() {
         window.fetch = async () => ({
             ok: false,
             status: 500,
-            text: async () => 'Server Error'
+            json: async () => ({})
         });
 
         const result = await shortenUrl('https://example.com');
@@ -189,29 +179,32 @@ function testShareLink() {
         console.warn = originalWarn;
     });
 
-    TestRunner.test('shortenUrl returns failure on invalid response', async () => {
+    TestRunner.test('shortenUrl returns failure on API error response', async () => {
         console.warn = () => {};
         window.fetch = async () => ({
             ok: true,
-            text: async () => 'Error: invalid URL'
+            json: async () => ({ error: 'API rate limit exceeded' })
         });
 
-        const result = await shortenUrl('not-a-url');
+        const result = await shortenUrl('https://example.com');
         TestRunner.assertFalse(result.success);
-        TestRunner.assertEqual(result.error, 'Invalid response from URL shortener');
+        TestRunner.assertEqual(result.error, 'API rate limit exceeded');
         console.warn = originalWarn;
     });
 
-    TestRunner.test('shortenUrl calls TinyURL API with encoded URL', async () => {
-        let calledUrl = '';
-        window.fetch = async (url) => {
-            calledUrl = url;
-            return { ok: true, text: async () => 'https://tinyurl.com/xyz' };
+    TestRunner.test('shortenUrl sends POST to CleanURI with encoded URL', async () => {
+        let capturedUrl = '';
+        let capturedOptions = {};
+        window.fetch = async (url, options) => {
+            capturedUrl = url;
+            capturedOptions = options;
+            return { ok: true, json: async () => ({ result_url: 'https://cleanuri.com/xyz' }) };
         };
 
         await shortenUrl('https://example.com/path?q=hello world');
-        TestRunner.assertTrue(calledUrl.includes('tinyurl.com/api-create.php'));
-        TestRunner.assertTrue(calledUrl.includes(encodeURIComponent('https://example.com/path?q=hello world')));
+        TestRunner.assertEqual(capturedUrl, 'https://cleanuri.com/api/v1/shorten');
+        TestRunner.assertEqual(capturedOptions.method, 'POST');
+        TestRunner.assertTrue(capturedOptions.body.includes(encodeURIComponent('https://example.com/path?q=hello world')));
     });
 
     // Restore fetch
