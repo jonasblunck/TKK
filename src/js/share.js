@@ -427,6 +427,10 @@ function getShareableState() {
             if (dayData[group]?.instructorId) {
                 assignedInstructorIds.add(dayData[group].instructorId);
             }
+            // Also include assistants
+            if (dayData[group]?.assistants) {
+                dayData[group].assistants.forEach(id => assignedInstructorIds.add(id));
+            }
         }
     }
     
@@ -445,13 +449,152 @@ function getShareableState() {
     };
 }
 
+// Group key mapping for compact encoding
+const GROUP_KEY_MAP = { beginners: 'b', children: 'c', adults: 'a' };
+const GROUP_KEY_REVERSE = { b: 'beginners', c: 'children', a: 'adults' };
+
+/**
+ * Encode shareable state into a compact format (v2).
+ * 
+ * Format: { v:2, m, y, i:[[id,name],...], s:[[day,{group:val}],...], d:[classDays], c:[cancelledDays], vo:true }
+ * 
+ * Group values:
+ *   - number: instructor index only
+ *   - [idx, desc]: instructor index + description
+ *   - [idx, null, [assistantIdx, ...]]: instructor + assistants (no description)
+ *   - [idx, desc, [assistantIdx, ...]]: instructor + description + assistants
+ */
+function encodeCompactState(shareableState) {
+    const { month, year, instructors, schedule, classDays, cancelledDays } = shareableState;
+    
+    // Build instructor index: id -> index
+    const idToIdx = {};
+    const compactInstructors = instructors.map((inst, idx) => {
+        idToIdx[inst.id] = idx;
+        return [inst.id, inst.name];
+    });
+    
+    // Encode schedule as [day, {groupKey: value}] tuples
+    const compactSchedule = [];
+    for (const dateStr in schedule) {
+        const day = parseInt(dateStr.split('-')[2], 10);
+        const dayData = schedule[dateStr];
+        const compactDay = {};
+        
+        for (const group of ALL_GROUPS) {
+            const slot = dayData[group];
+            if (!slot || slot.instructorId === undefined || slot.instructorId === null) continue;
+            
+            const idx = idToIdx[slot.instructorId];
+            if (idx === undefined) continue;
+            
+            const gKey = GROUP_KEY_MAP[group];
+            const desc = slot.description || null;
+            const assistants = slot.assistants && slot.assistants.length > 0
+                ? slot.assistants.map(id => idToIdx[id]).filter(i => i !== undefined)
+                : null;
+            
+            if (!desc && !assistants) {
+                compactDay[gKey] = idx;
+            } else if (desc && !assistants) {
+                compactDay[gKey] = [idx, desc];
+            } else if (!desc && assistants) {
+                compactDay[gKey] = [idx, null, assistants];
+            } else {
+                compactDay[gKey] = [idx, desc, assistants];
+            }
+        }
+        
+        if (Object.keys(compactDay).length > 0) {
+            compactSchedule.push([day, compactDay]);
+        }
+    }
+    
+    // Encode cancelled days as day-of-month numbers
+    const compactCancelled = Object.keys(cancelledDays)
+        .map(dateStr => parseInt(dateStr.split('-')[2], 10))
+        .sort((a, b) => a - b);
+    
+    const compact = { v: 2, m: month, y: year, i: compactInstructors, s: compactSchedule, d: classDays };
+    if (compactCancelled.length > 0) compact.c = compactCancelled;
+    compact.vo = true;
+    
+    return compact;
+}
+
+/**
+ * Decode compact format (v2) back to the full shareable state.
+ */
+function decodeCompactState(compact) {
+    if (compact.v !== 2) throw new Error('Unknown compact format version');
+    
+    const month = compact.m;
+    const year = compact.y;
+    const monthStr = String(month + 1).padStart(2, '0');
+    
+    // Rebuild instructors
+    const instructors = compact.i.map(([id, name]) => ({ id, name, groups: [], availableDates: [] }));
+    
+    // Rebuild schedule
+    const schedule = {};
+    for (const [day, groups] of compact.s) {
+        const dateStr = `${year}-${monthStr}-${String(day).padStart(2, '0')}`;
+        const dayData = {};
+        
+        for (const [gKey, value] of Object.entries(groups)) {
+            const group = GROUP_KEY_REVERSE[gKey];
+            if (!group) continue;
+            
+            let idx, desc = undefined, assistants = undefined;
+            if (typeof value === 'number') {
+                idx = value;
+            } else if (Array.isArray(value)) {
+                idx = value[0];
+                desc = value[1] || undefined;
+                assistants = value[2] || undefined;
+            } else {
+                continue;
+            }
+            
+            if (idx === undefined || idx === null || idx < 0 || idx >= instructors.length) continue;
+            
+            const slot = { instructorId: instructors[idx].id };
+            if (desc) slot.description = desc;
+            if (assistants && Array.isArray(assistants)) {
+                slot.assistants = assistants
+                    .filter(aIdx => aIdx >= 0 && aIdx < instructors.length)
+                    .map(aIdx => instructors[aIdx].id);
+            }
+            dayData[group] = slot;
+        }
+        
+        schedule[dateStr] = dayData;
+    }
+    
+    // Rebuild cancelled days
+    const cancelledDays = {};
+    if (compact.c) {
+        for (const day of compact.c) {
+            const dateStr = `${year}-${monthStr}-${String(day).padStart(2, '0')}`;
+            cancelledDays[dateStr] = true;
+        }
+    }
+    
+    return {
+        month, year, instructors, schedule,
+        classDays: compact.d || [],
+        cancelledDays,
+        viewOnly: !!compact.vo
+    };
+}
+
 function generateShareUrl() {
     const data = getShareableState();
-    const json = JSON.stringify(data);
+    const compact = encodeCompactState(data);
+    const json = JSON.stringify(compact);
     const compressed = LZString.compressToEncodedURIComponent(json);
     const baseUrl = window.location.origin + window.location.pathname;
-    // Use query parameter instead of hash - URL shorteners preserve query params but strip hashes
-    return `${baseUrl}?s=${compressed}`;
+    return `${baseUrl}?s2=${compressed}`;
 }
 
 async function shortenUrl(longUrl) {
@@ -474,15 +617,31 @@ async function shortenUrl(longUrl) {
 }
 
 function loadStateFromUrl() {
-    // Check for query parameter first (new format, works with URL shorteners)
     const urlParams = new URLSearchParams(window.location.search);
-    const shareParam = urlParams.get('s');
+    const compactParam = urlParams.get('s2');
+    const legacyParam = urlParams.get('s');
     
     // Also check hash for backwards compatibility
     const hash = window.location.hash;
     const hashData = (hash && hash.startsWith('#share=')) ? hash.substring(7) : null;
     
-    const compressed = shareParam || hashData;
+    // Try compact format (s2) first
+    if (compactParam) {
+        try {
+            const json = LZString.decompressFromEncodedURIComponent(compactParam);
+            if (!json) throw new Error('Failed to decompress data');
+            const compact = JSON.parse(json);
+            const data = decodeCompactState(compact);
+            applySharedState(data);
+            return true;
+        } catch (error) {
+            console.warn('Failed to load compact share link, trying legacy format:', error);
+            // Fall through to legacy format
+        }
+    }
+    
+    // Try legacy format (s param or hash)
+    const compressed = legacyParam || hashData;
     
     if (compressed) {
         try {
@@ -491,43 +650,7 @@ function loadStateFromUrl() {
                 throw new Error('Failed to decompress data');
             }
             const data = JSON.parse(json);
-            
-            // Set the month/year to display
-            if (typeof data.month === 'number') {
-                state.currentMonth = data.month;
-            }
-            if (typeof data.year === 'number') {
-                state.currentYear = data.year;
-            }
-            
-            // Load instructors (minimal data for display)
-            if (data.instructors && Array.isArray(data.instructors)) {
-                state.instructors = data.instructors.map(i => ({
-                    id: i.id,
-                    name: i.name,
-                    groups: i.groups || [],
-                    availableDates: i.availableDates || []
-                }));
-            }
-            if (data.schedule && typeof data.schedule === 'object') {
-                state.schedule = data.schedule;
-            }
-            if (data.classDays && Array.isArray(data.classDays)) {
-                state.classDays = data.classDays;
-            }
-            if (data.cancelledDays && typeof data.cancelledDays === 'object') {
-                state.cancelledDays = data.cancelledDays;
-            }
-            
-            // Enable view-only mode if specified
-            if (data.viewOnly) {
-                isViewOnlyMode = true;
-                applyViewOnlyMode();
-            }
-            
-            // Clear the hash to clean up the URL (but keep view-only mode active)
-            history.replaceState(null, '', window.location.pathname);
-            
+            applySharedState(data);
             return true;
         } catch (error) {
             console.error('Failed to load shared state:', error);
@@ -536,6 +659,40 @@ function loadStateFromUrl() {
         }
     }
     return false;
+}
+
+function applySharedState(data) {
+    if (typeof data.month === 'number') {
+        state.currentMonth = data.month;
+    }
+    if (typeof data.year === 'number') {
+        state.currentYear = data.year;
+    }
+    
+    if (data.instructors && Array.isArray(data.instructors)) {
+        state.instructors = data.instructors.map(i => ({
+            id: i.id,
+            name: i.name,
+            groups: i.groups || [],
+            availableDates: i.availableDates || []
+        }));
+    }
+    if (data.schedule && typeof data.schedule === 'object') {
+        state.schedule = data.schedule;
+    }
+    if (data.classDays && Array.isArray(data.classDays)) {
+        state.classDays = data.classDays;
+    }
+    if (data.cancelledDays && typeof data.cancelledDays === 'object') {
+        state.cancelledDays = data.cancelledDays;
+    }
+    
+    if (data.viewOnly) {
+        isViewOnlyMode = true;
+        applyViewOnlyMode();
+    }
+    
+    history.replaceState(null, '', window.location.pathname);
 }
 
 function applyViewOnlyMode() {
