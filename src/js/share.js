@@ -456,16 +456,16 @@ function generateShareUrl() {
 
 async function shortenUrl(longUrl) {
     try {
-        // Use is.gd API (supports CORS)
-        const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
+        // Use TinyURL API (supports CORS from browser)
+        const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
         if (!response.ok) {
             throw new Error('URL shortening failed');
         }
-        const data = await response.json();
-        if (data.shorturl) {
-            return { success: true, shortUrl: data.shorturl };
+        const shortUrl = (await response.text()).trim();
+        if (shortUrl && shortUrl.startsWith('http')) {
+            return { success: true, shortUrl };
         } else {
-            throw new Error(data.errormessage || 'Unknown error');
+            throw new Error('Invalid response from URL shortener');
         }
     } catch (error) {
         console.warn('URL shortening failed:', error);

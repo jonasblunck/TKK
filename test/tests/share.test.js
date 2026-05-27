@@ -139,6 +139,84 @@ function testShareLink() {
         TestRunner.assertEqual(groups[1], 'adults');
     });
     
+    // ---- shortenUrl tests (with fetch mocking) ----
+
+    const originalFetch = window.fetch;
+    const originalWarn = console.warn;
+
+    TestRunner.test('shortenUrl returns short URL on success', async () => {
+        window.fetch = async () => ({
+            ok: true,
+            text: async () => 'https://tinyurl.com/abc123'
+        });
+
+        const result = await shortenUrl('https://example.com/very/long/url');
+        TestRunner.assertTrue(result.success);
+        TestRunner.assertEqual(result.shortUrl, 'https://tinyurl.com/abc123');
+    });
+
+    TestRunner.test('shortenUrl trims whitespace from response', async () => {
+        window.fetch = async () => ({
+            ok: true,
+            text: async () => '  https://tinyurl.com/abc123\n'
+        });
+
+        const result = await shortenUrl('https://example.com');
+        TestRunner.assertEqual(result.shortUrl, 'https://tinyurl.com/abc123');
+    });
+
+    TestRunner.test('shortenUrl returns failure on HTTP error', async () => {
+        console.warn = () => {};
+        window.fetch = async () => ({
+            ok: false,
+            status: 500,
+            text: async () => 'Server Error'
+        });
+
+        const result = await shortenUrl('https://example.com');
+        TestRunner.assertFalse(result.success);
+        TestRunner.assertTrue(result.error.length > 0);
+        console.warn = originalWarn;
+    });
+
+    TestRunner.test('shortenUrl returns failure on network error', async () => {
+        console.warn = () => {};
+        window.fetch = async () => { throw new TypeError('Failed to fetch'); };
+
+        const result = await shortenUrl('https://example.com');
+        TestRunner.assertFalse(result.success);
+        TestRunner.assertEqual(result.error, 'Failed to fetch');
+        console.warn = originalWarn;
+    });
+
+    TestRunner.test('shortenUrl returns failure on invalid response', async () => {
+        console.warn = () => {};
+        window.fetch = async () => ({
+            ok: true,
+            text: async () => 'Error: invalid URL'
+        });
+
+        const result = await shortenUrl('not-a-url');
+        TestRunner.assertFalse(result.success);
+        TestRunner.assertEqual(result.error, 'Invalid response from URL shortener');
+        console.warn = originalWarn;
+    });
+
+    TestRunner.test('shortenUrl calls TinyURL API with encoded URL', async () => {
+        let calledUrl = '';
+        window.fetch = async (url) => {
+            calledUrl = url;
+            return { ok: true, text: async () => 'https://tinyurl.com/xyz' };
+        };
+
+        await shortenUrl('https://example.com/path?q=hello world');
+        TestRunner.assertTrue(calledUrl.includes('tinyurl.com/api-create.php'));
+        TestRunner.assertTrue(calledUrl.includes(encodeURIComponent('https://example.com/path?q=hello world')));
+    });
+
+    // Restore fetch
+    window.fetch = originalFetch;
+
     window.renderCalendar = originalRenderCalendar;
     window.renderInstructorList = originalRenderInstructorList;
     window.showToast = originalShowToast;

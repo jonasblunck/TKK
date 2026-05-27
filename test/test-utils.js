@@ -28,7 +28,13 @@ const TestRunner = {
     
     test(name, fn) {
         try {
-            fn();
+            const result = fn();
+            if (result && typeof result.then === 'function') {
+                // Async test - queue it for later execution
+                this._asyncTests = this._asyncTests || [];
+                this._asyncTests.push({ name, promise: result });
+                return;
+            }
             this.passed++;
             console.log(`  ✅ ${name}`);
         } catch (e) {
@@ -36,6 +42,22 @@ const TestRunner = {
             console.error(`  ❌ ${name}`);
             console.error(`     Error: ${e.message}`);
         }
+    },
+
+    async runAsyncTests() {
+        if (!this._asyncTests || this._asyncTests.length === 0) return;
+        for (const { name, promise } of this._asyncTests) {
+            try {
+                await promise;
+                this.passed++;
+                console.log(`  ✅ ${name}`);
+            } catch (e) {
+                this.failed++;
+                console.error(`  ❌ ${name}`);
+                console.error(`     Error: ${e.message}`);
+            }
+        }
+        this._asyncTests = [];
     },
     
     assertEqual(actual, expected, message = '') {

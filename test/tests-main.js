@@ -18,7 +18,7 @@ if (typeof window !== 'undefined') {
 // ============================================
 // RUN ALL TESTS
 // ============================================
-function runAllTests() {
+async function runAllTests() {
     console.clear();
     console.log('═══════════════════════════════════════════');
     console.log('     TKK Instructor Scheduler - Unit Tests');
@@ -38,6 +38,7 @@ function runAllTests() {
     testStorage();
     testAutogenerate();
     testShareLink();
+    await TestRunner.runAsyncTests();
     testAssistantInstructors();
     testSurplusInstructors();
     testExportFunctionality();
