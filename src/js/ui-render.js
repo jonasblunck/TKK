@@ -113,7 +113,13 @@ function renderCalendar() {
             const mergedLabel = span > 1 ? getMergedGroupLabel(dateStr, group) : '';
             
             const spanClass = span > 1 ? `merged-span-${span}` : '';
-            const bgClass = span === 3 ? 'all-levels-col' : (span === 2 && group === 'beginners' ? 'beg-chi-col' : (span === 2 && group === 'children' ? 'chi-adu-col' : `${group}-col`));
+            // Determine background class based on span and group
+            let bgClass = `${group}-col`;
+            if (span === 3) bgClass = 'all-levels-col';
+            else if (span === 4) bgClass = 'all-levels-col';
+            else if (span === 2 && group === 'beginners') bgClass = 'beg-chi-col';
+            else if (span === 2 && group === 'children') bgClass = 'chi-adu-col';
+            else if (span === 2 && group === 'redGreen') bgClass = 'rg-bb-col';
             
             // In view-only mode, disable all interactive features
             const viewOnly = typeof isViewOnlyMode !== 'undefined' && isViewOnlyMode;

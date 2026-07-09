@@ -123,6 +123,37 @@ function testStatistics() {
         TestRunner.assertEqual(unassignedSlots, 21);
     });
     
+    TestRunner.test('calculateStats works with August 4-group structure', () => {
+        TestRunner.resetStateForTest();
+        state.currentMonth = 7; // August
+        state.currentYear = 2025;
+        state.classDays = [1, 4, 6]; // Mon, Thu, Sat
+        state.cancelledDays = {};
+        
+        // Add instructors for August groups
+        const inst1 = addInstructor('Aug Inst 1', ['beginners', 'kids'], []);
+        const inst2 = addInstructor('Aug Inst 2', ['redGreen', 'blueBlack'], []);
+        
+        // Assign instructors on a class day (Monday Aug 4, 2025)
+        state.schedule['2025-08-04'] = {
+            beginners: { instructorId: inst1.id, description: '' },
+            kids: { instructorId: inst1.id, description: '' },
+            redGreen: { instructorId: inst2.id, description: '' },
+            blueBlack: { instructorId: inst2.id, description: '' }
+        };
+        
+        const { stats, totalAssignments } = calculateStats();
+        
+        // Check that stats are tracked for new groups
+        TestRunner.assertEqual(stats[inst1.id].beginners, 1);
+        TestRunner.assertEqual(stats[inst1.id].kids, 1);
+        TestRunner.assertEqual(stats[inst1.id].total, 2);
+        TestRunner.assertEqual(stats[inst2.id].redGreen, 1);
+        TestRunner.assertEqual(stats[inst2.id].blueBlack, 1);
+        TestRunner.assertEqual(stats[inst2.id].total, 2);
+        TestRunner.assertEqual(totalAssignments, 4);
+    });
+    
     window.renderCalendar = originalRenderCalendar;
     window.renderInstructorList = originalRenderInstructorList;
     window.showToast = originalShowToast;

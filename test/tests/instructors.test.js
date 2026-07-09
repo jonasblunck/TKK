@@ -61,6 +61,28 @@ function testInstructorManagement() {
         TestRunner.assertNull(state.schedule['2025-01-06'].beginners.instructorId);
     });
     
+    TestRunner.test('deleteInstructor clears instructor from August 4-group schedule', () => {
+        TestRunner.resetStateForTest();
+        state.currentMonth = 7; // August
+        state.currentYear = 2025;
+        
+        // Add instructor and assign to August groups
+        const instructor = addInstructor('Aug Delete', ['kids', 'blueBlack'], ['2025-08-04']);
+        state.schedule['2025-08-04'] = {
+            beginners: { instructorId: null, description: '' },
+            kids: { instructorId: instructor.id, description: '' },
+            redGreen: { instructorId: null, description: '' },
+            blueBlack: { instructorId: instructor.id, description: '', assistants: [instructor.id] }
+        };
+        
+        deleteInstructor(instructor.id);
+        
+        // Should be cleared from both groups and from assistants
+        TestRunner.assertNull(state.schedule['2025-08-04'].kids.instructorId);
+        TestRunner.assertNull(state.schedule['2025-08-04'].blueBlack.instructorId);
+        TestRunner.assertEqual(state.schedule['2025-08-04'].blueBlack.assistants.length, 0);
+    });
+    
     // Restore render functions
     window.renderInstructorList = originalRenderInstructorList;
     window.renderCalendar = originalRenderCalendar;

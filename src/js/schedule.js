@@ -302,6 +302,9 @@ function setMerges(dateStr, merges) {
             beginners: { instructorId: null, description: '', feedbackPoints: '' },
             children: { instructorId: null, description: '', feedbackPoints: '' },
             adults: { instructorId: null, description: '', feedbackPoints: '' },
+            kids: { instructorId: null, description: '', feedbackPoints: '' },
+            redGreen: { instructorId: null, description: '', feedbackPoints: '' },
+            blueBlack: { instructorId: null, description: '', feedbackPoints: '' },
             merges: []
         };
     }
@@ -311,27 +314,43 @@ function setMerges(dateStr, merges) {
 
 function isGroupMerged(dateStr, group) {
     const merges = getMerges(dateStr);
-    // Check if this group is the secondary part of a merge
+    // Pre-August groups (3-group structure)
     if (group === 'children' && merges.includes('beg-chi')) return { merged: true, primary: 'beginners' };
     if (group === 'adults' && merges.includes('chi-adu')) return { merged: true, primary: 'children' };
     if (group === 'children' && merges.includes('all')) return { merged: true, primary: 'beginners' };
     if (group === 'adults' && merges.includes('all')) return { merged: true, primary: 'beginners' };
+    // August onwards groups (4-group structure)
+    if (group === 'kids' && merges.includes('beg-kids')) return { merged: true, primary: 'beginners' };
+    if (group === 'blueBlack' && merges.includes('rg-bb')) return { merged: true, primary: 'redGreen' };
+    if (group === 'kids' && merges.includes('all-aug')) return { merged: true, primary: 'beginners' };
+    if (group === 'redGreen' && merges.includes('all-aug')) return { merged: true, primary: 'beginners' };
+    if (group === 'blueBlack' && merges.includes('all-aug')) return { merged: true, primary: 'beginners' };
     return { merged: false, primary: null };
 }
 
 function getMergeSpan(dateStr, group) {
     const merges = getMerges(dateStr);
+    // Pre-August groups (3-group structure)
     if (merges.includes('all') && group === 'beginners') return 3;
     if (merges.includes('beg-chi') && group === 'beginners') return 2;
     if (merges.includes('chi-adu') && group === 'children') return 2;
+    // August onwards groups (4-group structure)
+    if (merges.includes('all-aug') && group === 'beginners') return 4;
+    if (merges.includes('beg-kids') && group === 'beginners') return 2;
+    if (merges.includes('rg-bb') && group === 'redGreen') return 2;
     return 1;
 }
 
 function getMergedGroupLabel(dateStr, group) {
     const merges = getMerges(dateStr);
+    // Pre-August groups (3-group structure)
     if (merges.includes('all') && group === 'beginners') return 'All Levels';
     if (merges.includes('beg-chi') && group === 'beginners') return 'Beginners + Children';
     if (merges.includes('chi-adu') && group === 'children') return 'Children + Adults';
+    // August onwards groups (4-group structure)
+    if (merges.includes('all-aug') && group === 'beginners') return 'All Levels';
+    if (merges.includes('beg-kids') && group === 'beginners') return 'Beginners + Kids';
+    if (merges.includes('rg-bb') && group === 'redGreen') return 'Red-Green + Blue-Black';
     return GROUP_LABELS[group];
 }
 

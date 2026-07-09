@@ -234,6 +234,38 @@ function testShareLink() {
         TestRunner.assertEqual(restored.schedule['2025-07-07'].children.description, 'Kids class');
     });
     
+    TestRunner.test('Share link works with August 4-group structure', () => {
+        TestRunner.resetStateForTest();
+        state.currentMonth = 7; // August (new 4-group structure)
+        state.currentYear = 2025;
+        state.classDays = [1, 4, 6];
+        
+        const inst1 = addInstructor('Aug Inst 1', ['beginners'], ['2025-08-04']);
+        const inst2 = addInstructor('Aug Inst 2', ['kids'], ['2025-08-04']);
+        const inst3 = addInstructor('Aug Inst 3', ['redGreen'], ['2025-08-04']);
+        const inst4 = addInstructor('Aug Inst 4', ['blueBlack'], ['2025-08-04']);
+        state.schedule['2025-08-04'] = {
+            beginners: { instructorId: inst1.id, description: 'Beginners class' },
+            kids: { instructorId: inst2.id, description: 'Kids class' },
+            redGreen: { instructorId: inst3.id, description: 'Red-Green class' },
+            blueBlack: { instructorId: inst4.id, description: 'Blue-Black class' }
+        };
+        
+        const link = generateShareUrl();
+        const encodedData = link.split('?s2=')[1];
+        const decoded = LZString.decompressFromEncodedURIComponent(encodedData);
+        const compact = JSON.parse(decoded);
+        const restored = decodeCompactState(compact);
+        
+        TestRunner.assertEqual(restored.month, 7);
+        TestRunner.assertEqual(restored.instructors.length, 4);
+        TestRunner.assertEqual(restored.schedule['2025-08-04'].beginners.instructorId, inst1.id);
+        TestRunner.assertEqual(restored.schedule['2025-08-04'].kids.instructorId, inst2.id);
+        TestRunner.assertEqual(restored.schedule['2025-08-04'].redGreen.instructorId, inst3.id);
+        TestRunner.assertEqual(restored.schedule['2025-08-04'].blueBlack.instructorId, inst4.id);
+        TestRunner.assertEqual(restored.schedule['2025-08-04'].kids.description, 'Kids class');
+    });
+    
     TestRunner.test('loadFromShareLink still works with legacy s param', () => {
         // Verify legacy format can be decoded via LZString
         const testState = {

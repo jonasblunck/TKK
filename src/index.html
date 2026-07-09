@@ -183,6 +183,21 @@
             color: #c62828;
         }
 
+        .group-tag.kids {
+            background: #e1bee7;
+            color: #7b1fa2;
+        }
+
+        .group-tag.redGreen {
+            background: #ffccbc;
+            color: #bf360c;
+        }
+
+        .group-tag.blueBlack {
+            background: #bbdefb;
+            color: #1565c0;
+        }
+
         /* === Calendar Area === */
         .calendar-area {
             background: white;
@@ -269,13 +284,19 @@
 
         .calendar-cell.beginners-col,
         .calendar-cell.children-col,
-        .calendar-cell.adults-col {
+        .calendar-cell.adults-col,
+        .calendar-cell.kids-col,
+        .calendar-cell.redGreen-col,
+        .calendar-cell.blueBlack-col {
             background: #f8f9fa;
         }
 
         .calendar-cell.header.beginners-col,
         .calendar-cell.header.children-col,
-        .calendar-cell.header.adults-col {
+        .calendar-cell.header.adults-col,
+        .calendar-cell.header.kids-col,
+        .calendar-cell.header.redGreen-col,
+        .calendar-cell.header.blueBlack-col {
             background: #e9ecef;
             color: #495057;
         }
@@ -407,6 +428,10 @@
             grid-column: span 3;
         }
 
+        .calendar-cell.merged-span-4 {
+            grid-column: span 4;
+        }
+
         .merge-badge {
             display: inline-block;
             background: #9c27b0;
@@ -427,7 +452,10 @@
         /* === Export Mode: Higher contrast & larger fonts for image sharing === */
         .export-mode .calendar-cell.beginners-col,
         .export-mode .calendar-cell.children-col,
-        .export-mode .calendar-cell.adults-col {
+        .export-mode .calendar-cell.adults-col,
+        .export-mode .calendar-cell.kids-col,
+        .export-mode .calendar-cell.redGreen-col,
+        .export-mode .calendar-cell.blueBlack-col {
             background: #ffffff;
         }
         .export-mode .calendar-cell.header {

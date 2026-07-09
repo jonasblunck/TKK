@@ -421,9 +421,10 @@ function getShareableState() {
     
     // Only include instructors that are assigned in this month's schedule
     const assignedInstructorIds = new Set();
+    const allPossibleGroups = Object.keys(GROUP_KEY_MAP);
     for (const dateStr in monthSchedule) {
         const dayData = monthSchedule[dateStr];
-        for (const group of ALL_GROUPS) {
+        for (const group of allPossibleGroups) {
             if (dayData[group]?.instructorId) {
                 assignedInstructorIds.add(dayData[group].instructorId);
             }
@@ -450,8 +451,8 @@ function getShareableState() {
 }
 
 // Group key mapping for compact encoding
-const GROUP_KEY_MAP = { beginners: 'b', children: 'c', adults: 'a' };
-const GROUP_KEY_REVERSE = { b: 'beginners', c: 'children', a: 'adults' };
+const GROUP_KEY_MAP = { beginners: 'b', children: 'c', adults: 'a', kids: 'k', redGreen: 'r', blueBlack: 'l' };
+const GROUP_KEY_REVERSE = { b: 'beginners', c: 'children', a: 'adults', k: 'kids', r: 'redGreen', l: 'blueBlack' };
 
 /**
  * Encode shareable state into a compact format (v2).
@@ -476,12 +477,13 @@ function encodeCompactState(shareableState) {
     
     // Encode schedule as [day, {groupKey: value}] tuples
     const compactSchedule = [];
+    const allPossibleGroups = Object.keys(GROUP_KEY_MAP);
     for (const dateStr in schedule) {
         const day = parseInt(dateStr.split('-')[2], 10);
         const dayData = schedule[dateStr];
         const compactDay = {};
         
-        for (const group of ALL_GROUPS) {
+        for (const group of allPossibleGroups) {
             const slot = dayData[group];
             if (!slot || slot.instructorId === undefined || slot.instructorId === null) continue;
             

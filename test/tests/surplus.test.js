@@ -116,6 +116,38 @@ function testSurplusInstructors() {
         TestRunner.assertTrue(!available.some(i => i.id === assistant.id));
     });
     
+    TestRunner.test('getAvailableSurplusInstructors works with August 4-group structure', () => {
+        TestRunner.resetStateForTest();
+        state.currentMonth = 7; // August
+        state.currentYear = 2025;
+        state.classDays = [1, 4, 6];
+        
+        const targetDate = '2025-08-04'; // Monday
+        
+        // Create instructors for each of the 4 August groups
+        const inst1 = addInstructor('BegInst', ['beginners'], [targetDate]);
+        const inst2 = addInstructor('KidsInst', ['kids'], [targetDate]);
+        const inst3 = addInstructor('RGInst', ['redGreen'], [targetDate]);
+        const inst4 = addInstructor('BBInst', ['blueBlack'], [targetDate]);
+        const surplus = addInstructor('SurplusInst', ['beginners', 'kids'], [targetDate]);
+        
+        // Assign all 4 group instructors
+        assignInstructor(targetDate, 'beginners', inst1.id);
+        assignInstructor(targetDate, 'kids', inst2.id);
+        assignInstructor(targetDate, 'redGreen', inst3.id);
+        assignInstructor(targetDate, 'blueBlack', inst4.id);
+        
+        const available = getAvailableSurplusInstructors(targetDate);
+        
+        // Surplus instructor should be in the list (not assigned)
+        TestRunner.assertTrue(available.some(i => i.id === surplus.id));
+        // Assigned instructors should NOT be in the surplus list
+        TestRunner.assertTrue(!available.some(i => i.id === inst1.id));
+        TestRunner.assertTrue(!available.some(i => i.id === inst2.id));
+        TestRunner.assertTrue(!available.some(i => i.id === inst3.id));
+        TestRunner.assertTrue(!available.some(i => i.id === inst4.id));
+    });
+    
     window.renderCalendar = originalRenderCalendar;
     window.renderInstructorList = originalRenderInstructorList;
     window.showToast = originalShowToast;

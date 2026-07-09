@@ -128,17 +128,20 @@ function calculateStats() {
     const year = state.currentYear;
     const month = state.currentMonth;
     const daysInMonth = getDaysInMonth(year, month);
+    const groups = getGroupsForMonth(month);
     
-    // Initialize stats for each instructor
+    // Initialize stats for each instructor with dynamic groups
     const stats = {};
     state.instructors.forEach(instructor => {
-        stats[instructor.id] = {
+        const instStats = {
             name: instructor.name,
-            beginners: 0,
-            children: 0,
-            adults: 0,
             total: 0
         };
+        // Initialize all possible groups to 0
+        Object.keys(GROUP_LABELS).forEach(group => {
+            instStats[group] = 0;
+        });
+        stats[instructor.id] = instStats;
     });
     
     // Count assignments
@@ -190,9 +193,13 @@ function calculateStats() {
 
 function openStatsModal() {
     const { stats, totalAssignments, unassignedSlots, mergedDays, daysInMonth } = calculateStats();
+    const groups = getGroupsForMonth(state.currentMonth);
     
     document.getElementById('statsTitle').textContent = 
         `Instructor Statistics - ${MONTH_NAMES[state.currentMonth]} ${state.currentYear}`;
+    
+    // Build dynamic table headers
+    const headerCells = groups.map(g => `<th class="col-${g}">${GROUP_LABELS[g]}</th>`).join('');
     
     // Build table HTML
     let html = `
@@ -200,9 +207,7 @@ function openStatsModal() {
             <thead>
                 <tr>
                     <th>Instructor</th>
-                    <th class="col-beginners">Beginners</th>
-                    <th class="col-children">Children</th>
-                    <th class="col-adults">Adults</th>
+                    ${headerCells}
                     <th>Total</th>
                 </tr>
             </thead>
@@ -212,30 +217,35 @@ function openStatsModal() {
     // Sort by total sessions descending
     const sortedStats = Object.values(stats).sort((a, b) => b.total - a.total);
     
-    let groupTotals = { beginners: 0, children: 0, adults: 0 };
+    // Initialize group totals dynamically
+    const groupTotals = {};
+    groups.forEach(g => groupTotals[g] = 0);
     
     sortedStats.forEach(s => {
-        groupTotals.beginners += s.beginners;
-        groupTotals.children += s.children;
-        groupTotals.adults += s.adults;
+        // Accumulate totals
+        groups.forEach(g => groupTotals[g] += s[g]);
+        
+        // Build row cells dynamically
+        const rowCells = groups.map(g => 
+            `<td class="count ${s[g] === 0 ? 'count-zero' : ''}">${s[g]}</td>`
+        ).join('');
         
         html += `
             <tr>
                 <td>${s.name}</td>
-                <td class="count ${s.beginners === 0 ? 'count-zero' : ''}">${s.beginners}</td>
-                <td class="count ${s.children === 0 ? 'count-zero' : ''}">${s.children}</td>
-                <td class="count ${s.adults === 0 ? 'count-zero' : ''}">${s.adults}</td>
+                ${rowCells}
                 <td class="count">${s.total}</td>
             </tr>
         `;
     });
     
+    // Build total row cells dynamically
+    const totalCells = groups.map(g => `<td>${groupTotals[g]}</td>`).join('');
+    
     html += `
             <tr class="total-row">
                 <td>Total</td>
-                <td>${groupTotals.beginners}</td>
-                <td>${groupTotals.children}</td>
-                <td>${groupTotals.adults}</td>
+                ${totalCells}
                 <td>${totalAssignments}</td>
             </tr>
         </tbody>

@@ -185,7 +185,9 @@ function getAvailableSurplusInstructors(dateStr) {
     const daySchedule = state.schedule[dateStr];
     
     if (daySchedule) {
-        for (const group of ALL_GROUPS) {
+        // Check all possible groups (both old and new structures)
+        const allPossibleGroups = Object.keys(GROUP_LABELS);
+        for (const group of allPossibleGroups) {
             const slotData = daySchedule[group];
             if (slotData?.instructorId) {
                 assignedIds.add(slotData.instructorId);
