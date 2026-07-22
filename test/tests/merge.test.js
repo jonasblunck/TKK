@@ -76,6 +76,39 @@ function testMergeLogic() {
         setMerges('2025-01-15', ['chi-adu']);
         TestRunner.assertEqual(getMergedGroupLabel('2025-01-15', 'children'), 'Children + Adults');
     });
+
+    TestRunner.test('isGroupMerged supports red-green merged with blue-black', () => {
+        setMerges('2026-08-17', ['m:redGreen:blueBlack']);
+        const result = isGroupMerged('2026-08-17', 'blueBlack');
+        TestRunner.assertTrue(result.merged);
+        TestRunner.assertEqual(result.primary, 'redGreen');
+    });
+
+    TestRunner.test('setMergedGroupsForPrimary supports merging multiple groups to the right', () => {
+        setMergedGroupsForPrimary('2026-08-06', 'kids', ['redGreen', 'blueBlack']);
+
+        TestRunner.assertEqual(getMergeSpan('2026-08-06', 'kids'), 3);
+
+        const rgResult = isGroupMerged('2026-08-06', 'redGreen');
+        TestRunner.assertTrue(rgResult.merged);
+        TestRunner.assertEqual(rgResult.primary, 'kids');
+
+        const bbResult = isGroupMerged('2026-08-06', 'blueBlack');
+        TestRunner.assertTrue(bbResult.merged);
+        TestRunner.assertEqual(bbResult.primary, 'kids');
+
+        TestRunner.assertEqual(
+            getMergedGroupLabel('2026-08-06', 'kids'),
+            'Kids + Red - Green + Blue - Black'
+        );
+    });
+
+    TestRunner.test('legacy August merge tokens remain supported', () => {
+        setMerges('2026-08-20', ['rg-bb']);
+        const result = isGroupMerged('2026-08-20', 'blueBlack');
+        TestRunner.assertTrue(result.merged);
+        TestRunner.assertEqual(result.primary, 'redGreen');
+    });
     
     window.renderCalendar = originalRenderCalendar;
     window.showToast = originalShowToast;

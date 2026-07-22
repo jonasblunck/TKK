@@ -312,46 +312,147 @@ function setMerges(dateStr, merges) {
     renderCalendar();
 }
 
-function isGroupMerged(dateStr, group) {
+function getGroupsForDate(dateStr) {
+    const month = parseInt(dateStr.split('-')[1], 10) - 1;
+    return getGroupsForMonth(month);
+}
+
+function getMergeMap(dateStr) {
     const merges = getMerges(dateStr);
-    // Pre-August groups (3-group structure)
-    if (group === 'children' && merges.includes('beg-chi')) return { merged: true, primary: 'beginners' };
-    if (group === 'adults' && merges.includes('chi-adu')) return { merged: true, primary: 'children' };
-    if (group === 'children' && merges.includes('all')) return { merged: true, primary: 'beginners' };
-    if (group === 'adults' && merges.includes('all')) return { merged: true, primary: 'beginners' };
-    // August onwards groups (4-group structure)
-    if (group === 'kids' && merges.includes('beg-kids')) return { merged: true, primary: 'beginners' };
-    if (group === 'blueBlack' && merges.includes('rg-bb')) return { merged: true, primary: 'redGreen' };
-    if (group === 'kids' && merges.includes('all-aug')) return { merged: true, primary: 'beginners' };
-    if (group === 'redGreen' && merges.includes('all-aug')) return { merged: true, primary: 'beginners' };
-    if (group === 'blueBlack' && merges.includes('all-aug')) return { merged: true, primary: 'beginners' };
+    const mergeMap = {};
+
+    function addMerge(primary, merged) {
+        if (!mergeMap[primary]) {
+            mergeMap[primary] = new Set();
+        }
+        mergeMap[primary].add(merged);
+    }
+
+    for (const mergeToken of merges) {
+        if (mergeToken === 'beg-chi') {
+            addMerge('beginners', 'children');
+            continue;
+        }
+        if (mergeToken === 'chi-adu') {
+            addMerge('children', 'adults');
+            continue;
+        }
+        if (mergeToken === 'all') {
+            addMerge('beginners', 'children');
+            addMerge('beginners', 'adults');
+            continue;
+        }
+        if (mergeToken === 'beg-kids') {
+            addMerge('beginners', 'kids');
+            continue;
+        }
+        if (mergeToken === 'rg-bb') {
+            addMerge('redGreen', 'blueBlack');
+            continue;
+        }
+        if (mergeToken === 'all-aug') {
+            addMerge('beginners', 'kids');
+            addMerge('beginners', 'redGreen');
+            addMerge('beginners', 'blueBlack');
+            continue;
+        }
+
+        if (mergeToken.startsWith('m:')) {
+            const parts = mergeToken.split(':');
+            if (parts.length === 3 && parts[1] && parts[2]) {
+                addMerge(parts[1], parts[2]);
+            }
+        }
+    }
+
+    return mergeMap;
+}
+
+function serializeMergeMap(mergeMap) {
+    const serialized = [];
+
+    for (const primary of Object.keys(mergeMap).sort()) {
+        const mergedGroups = Array.from(mergeMap[primary]).sort();
+        for (const merged of mergedGroups) {
+            serialized.push(`m:${primary}:${merged}`);
+        }
+    }
+
+    return serialized;
+}
+
+function getMergedGroupsForPrimary(dateStr, primary) {
+    const mergeMap = getMergeMap(dateStr);
+    return Array.from(mergeMap[primary] || []);
+}
+
+function setMergedGroupsForPrimary(dateStr, primary, mergedGroups) {
+    const mergeMap = getMergeMap(dateStr);
+
+    // Replace only this primary's configuration.
+    delete mergeMap[primary];
+
+    const uniqueMergedGroups = Array.from(new Set(mergedGroups));
+    if (uniqueMergedGroups.length > 0) {
+        mergeMap[primary] = new Set(uniqueMergedGroups);
+    }
+
+    // Remove conflicting chains where a merged group would also act as a primary.
+    for (const mergedGroup of uniqueMergedGroups) {
+        delete mergeMap[mergedGroup];
+    }
+
+    // Remove conflicts where another primary tries to merge into groups now merged by this primary.
+    for (const otherPrimary of Object.keys(mergeMap)) {
+        if (otherPrimary === primary) continue;
+
+        const filtered = Array.from(mergeMap[otherPrimary]).filter(
+            group => !uniqueMergedGroups.includes(group)
+        );
+
+        if (filtered.length === 0) {
+            delete mergeMap[otherPrimary];
+        } else {
+            mergeMap[otherPrimary] = new Set(filtered);
+        }
+    }
+
+    setMerges(dateStr, serializeMergeMap(mergeMap));
+}
+
+function isGroupMerged(dateStr, group) {
+    const mergeMap = getMergeMap(dateStr);
+    for (const primary of Object.keys(mergeMap)) {
+        if (mergeMap[primary].has(group)) {
+            return { merged: true, primary };
+        }
+    }
     return { merged: false, primary: null };
 }
 
 function getMergeSpan(dateStr, group) {
-    const merges = getMerges(dateStr);
-    // Pre-August groups (3-group structure)
-    if (merges.includes('all') && group === 'beginners') return 3;
-    if (merges.includes('beg-chi') && group === 'beginners') return 2;
-    if (merges.includes('chi-adu') && group === 'children') return 2;
-    // August onwards groups (4-group structure)
-    if (merges.includes('all-aug') && group === 'beginners') return 4;
-    if (merges.includes('beg-kids') && group === 'beginners') return 2;
-    if (merges.includes('rg-bb') && group === 'redGreen') return 2;
+    const mergeMap = getMergeMap(dateStr);
+    if (mergeMap[group]) {
+        return 1 + mergeMap[group].size;
+    }
     return 1;
 }
 
 function getMergedGroupLabel(dateStr, group) {
-    const merges = getMerges(dateStr);
-    // Pre-August groups (3-group structure)
-    if (merges.includes('all') && group === 'beginners') return 'All Levels';
-    if (merges.includes('beg-chi') && group === 'beginners') return 'Beginners + Children';
-    if (merges.includes('chi-adu') && group === 'children') return 'Children + Adults';
-    // August onwards groups (4-group structure)
-    if (merges.includes('all-aug') && group === 'beginners') return 'All Levels';
-    if (merges.includes('beg-kids') && group === 'beginners') return 'Beginners + Kids';
-    if (merges.includes('rg-bb') && group === 'redGreen') return 'Red-Green + Blue-Black';
-    return GROUP_LABELS[group];
+    const mergeMap = getMergeMap(dateStr);
+    const mergedGroups = Array.from(mergeMap[group] || []);
+    if (mergedGroups.length === 0) {
+        return GROUP_LABELS[group];
+    }
+
+    const activeGroups = getGroupsForDate(dateStr);
+    if (activeGroups[0] === group && mergedGroups.length === activeGroups.length - 1) {
+        return 'All Levels';
+    }
+
+    const orderedMergedGroups = activeGroups.filter(g => mergedGroups.includes(g));
+    const labels = [GROUP_LABELS[group], ...orderedMergedGroups.map(g => GROUP_LABELS[g])];
+    return labels.join(' + ');
 }
 
 // ============================================

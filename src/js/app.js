@@ -217,37 +217,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const description = document.getElementById('classDescription').value.trim();
         const feedbackPoints = document.getElementById('feedbackPoints').value.trim();
         setClassDescription(state.editingDescriptionDate, state.editingDescriptionGroup, description, feedbackPoints);
-        
-        // Handle merge options
+
+        // Handle merge options: selected group can merge with groups to its right
         const group = state.editingDescriptionGroup;
         const dateStr = state.editingDescriptionDate;
         const mergeCheck1 = document.getElementById('mergeCheck1');
         const mergeCheck2 = document.getElementById('mergeCheck2');
-        
-        let newMerges = [];
-        
-        if (group === 'beginners') {
-            if (mergeCheck2.checked) {
-                newMerges = ['all'];
-            } else if (mergeCheck1.checked) {
-                newMerges = ['beg-chi'];
-            }
-        } else if (group === 'children') {
-            // Preserve beg-chi or all merges if they exist
-            const current = getMerges(dateStr);
-            if (current.includes('all')) {
-                newMerges = ['all'];
-            } else if (current.includes('beg-chi')) {
-                newMerges = ['beg-chi'];
-                if (mergeCheck1.checked) {
-                    newMerges.push('chi-adu');
-                }
-            } else if (mergeCheck1.checked) {
-                newMerges = ['chi-adu'];
-            }
+
+        let mergedGroups = [];
+        if (mergeCheck2.checked && mergeCheck2.value) {
+            mergedGroups = mergeCheck2.value.split(',').map(v => v.trim()).filter(Boolean);
+        } else if (mergeCheck1.checked && mergeCheck1.value) {
+            mergedGroups = [mergeCheck1.value];
         }
-        
-        setMerges(dateStr, newMerges);
+
+        setMergedGroupsForPrimary(dateStr, group, mergedGroups);
         
         showToast('Class details saved', 'success');
         closeDescriptionModal();

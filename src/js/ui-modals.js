@@ -72,7 +72,7 @@ function openDescriptionModal(dateStr, group) {
     document.getElementById('classDescription').value = slotData.description || '';
     document.getElementById('feedbackPoints').value = slotData.feedbackPoints || '';
     
-    // Setup merge options based on which group is selected
+    // Setup merge options based on groups to the right of the selected group
     const mergeOptionsDiv = document.getElementById('mergeOptions');
     const mergeOption1 = document.getElementById('mergeOption1');
     const mergeOption2 = document.getElementById('mergeOption2');
@@ -80,35 +80,56 @@ function openDescriptionModal(dateStr, group) {
     const mergeCheck2 = document.getElementById('mergeCheck2');
     const mergeLabel1 = document.getElementById('mergeLabel1');
     const mergeLabel2 = document.getElementById('mergeLabel2');
-    
-    const currentMerges = getMerges(dateStr);
+
+    const groups = getGroupsForDate(dateStr);
+    const currentIndex = groups.indexOf(group);
+    const rightGroups = currentIndex >= 0 ? groups.slice(currentIndex + 1) : [];
+    const currentMergedGroups = getMergedGroupsForPrimary(dateStr, group);
     
     // Reset
     mergeOption1.style.display = 'none';
     mergeOption2.style.display = 'none';
+    mergeCheck1.value = '';
+    mergeCheck2.value = '';
     mergeCheck1.checked = false;
     mergeCheck2.checked = false;
-    
-    if (group === 'beginners') {
+
+    if (rightGroups.length > 0) {
         mergeOptionsDiv.style.display = 'block';
+
+        const firstRightGroup = rightGroups[0];
         mergeOption1.style.display = 'flex';
-        mergeCheck1.value = 'beg-chi';
-        mergeLabel1.textContent = 'Merge with Children';
-        mergeCheck1.checked = currentMerges.includes('beg-chi') || currentMerges.includes('all');
-        
-        mergeOption2.style.display = 'flex';
-        mergeCheck2.value = 'all';
-        mergeLabel2.textContent = 'Merge ALL groups (Beg + Chi + Adu)';
-        mergeCheck2.checked = currentMerges.includes('all');
-    } else if (group === 'children') {
-        mergeOptionsDiv.style.display = 'block';
-        mergeOption1.style.display = 'flex';
-        mergeCheck1.value = 'chi-adu';
-        mergeLabel1.textContent = 'Merge with Adults';
-        mergeCheck1.checked = currentMerges.includes('chi-adu');
+        mergeCheck1.value = firstRightGroup;
+        mergeLabel1.textContent = `Merge with ${GROUP_LABELS[firstRightGroup]}`;
+        mergeCheck1.checked = currentMergedGroups.includes(firstRightGroup);
+
+        if (rightGroups.length > 1) {
+            mergeOption2.style.display = 'flex';
+            mergeCheck2.value = rightGroups.join(',');
+            mergeLabel2.textContent = `Merge with all to the right (${rightGroups.map(g => GROUP_LABELS[g]).join(' + ')})`;
+            mergeCheck2.checked = rightGroups.every(g => currentMergedGroups.includes(g));
+        }
     } else {
         mergeOptionsDiv.style.display = 'none';
     }
+
+    function syncMergeCheckboxState() {
+        const allRightSelected = mergeOption2.style.display !== 'none' && mergeCheck2.checked;
+
+        if (allRightSelected) {
+            mergeCheck1.checked = true;
+            mergeCheck1.disabled = true;
+            mergeOption1.style.opacity = '0.65';
+            mergeOption1.title = 'Automatically enabled when merging with all groups to the right';
+        } else {
+            mergeCheck1.disabled = false;
+            mergeOption1.style.opacity = '';
+            mergeOption1.title = '';
+        }
+    }
+
+    mergeCheck2.onchange = syncMergeCheckboxState;
+    syncMergeCheckboxState();
     
     document.getElementById('descriptionModal').classList.add('active');
     document.getElementById('classDescription').focus();
