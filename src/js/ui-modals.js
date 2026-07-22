@@ -2,6 +2,15 @@
 // MODAL FUNCTIONS
 // ============================================
 
+function renderGroupCheckboxes(selectedGroups = []) {
+    const month = parseInt(state.currentMonth, 10);
+    const groups = getGroupsForMonth(month);
+    const container = document.getElementById('groupCheckboxes');
+    container.innerHTML = groups.map(g =>
+        `<label><input type="checkbox" name="groups" value="${g}"${selectedGroups.includes(g) ? ' checked' : ''}> ${GROUP_LABELS[g]}</label>`
+    ).join('');
+}
+
 function openAddInstructorModal() {
     state.editingInstructorId = null;
     state.selectedDates = [];
@@ -12,7 +21,7 @@ function openAddInstructorModal() {
     
     document.getElementById('modalTitle').textContent = 'Add Instructor';
     document.getElementById('instructorName').value = '';
-    document.querySelectorAll('input[name="groups"]').forEach(cb => cb.checked = false);
+    renderGroupCheckboxes();
     
     renderDatePicker();
     document.getElementById('instructorModal').classList.add('active');
@@ -31,9 +40,7 @@ function openEditInstructorModal(id) {
     
     document.getElementById('modalTitle').textContent = 'Edit Instructor';
     document.getElementById('instructorName').value = instructor.name;
-    document.querySelectorAll('input[name="groups"]').forEach(cb => {
-        cb.checked = instructor.groups.includes(cb.value);
-    });
+    renderGroupCheckboxes(instructor.groups);
     
     renderDatePicker();
     document.getElementById('instructorModal').classList.add('active');

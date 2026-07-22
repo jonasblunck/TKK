@@ -9,24 +9,22 @@ function autoGenerateSchedule() {
     
     // Track assignment counts per instructor per group for fair distribution
     const assignmentCounts = {};
+    const monthGroups = getGroupsForMonth(month);
     state.instructors.forEach(instructor => {
-        assignmentCounts[instructor.id] = {
-            beginners: 0,
-            children: 0,
-            adults: 0,
-            total: 0
-        };
+        const counts = { total: 0 };
+        monthGroups.forEach(g => { counts[g] = 0; });
+        assignmentCounts[instructor.id] = counts;
     });
     
     // Clear current month's schedule (preserve existing descriptions)
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = formatDate(year, month, day);
         const existing = state.schedule[dateStr] || {};
-        state.schedule[dateStr] = {
-            beginners: { instructorId: null, description: existing.beginners?.description || '' },
-            children: { instructorId: null, description: existing.children?.description || '' },
-            adults: { instructorId: null, description: existing.adults?.description || '' }
-        };
+        const daySchedule = {};
+        monthGroups.forEach(g => {
+            daySchedule[g] = { instructorId: null, description: existing[g]?.description || '' };
+        });
+        state.schedule[dateStr] = daySchedule;
     }
     
     // Get list of class days to schedule

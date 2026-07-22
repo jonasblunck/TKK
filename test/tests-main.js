@@ -37,6 +37,7 @@ async function runAllTests() {
     testStatistics();
     testStorage();
     testAutogenerate();
+    testAutogenerateAugustGroups();
     testShareLink();
     await TestRunner.runAsyncTests();
     testAssistantInstructors();
