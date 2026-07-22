@@ -109,6 +109,30 @@ function testMergeLogic() {
         TestRunner.assertTrue(result.merged);
         TestRunner.assertEqual(result.primary, 'redGreen');
     });
+
+    TestRunner.test('openDescriptionModal shows merged group names in header', () => {
+        const modal = document.createElement('div');
+        modal.id = 'descriptionModal';
+        modal.innerHTML = `
+            <label id="descriptionLabel"></label>
+            <textarea id="classDescription"></textarea>
+            <textarea id="feedbackPoints"></textarea>
+            <div id="mergeOptions"></div>
+            <label id="mergeOption1"><input type="checkbox" id="mergeCheck1" value=""><span id="mergeLabel1"></span></label>
+            <label id="mergeOption2"><input type="checkbox" id="mergeCheck2" value=""><span id="mergeLabel2"></span></label>
+        `;
+        document.body.appendChild(modal);
+
+        setMergedGroupsForPrimary('2026-08-15', 'kids', ['redGreen', 'blueBlack']);
+        openDescriptionModal('2026-08-15', 'kids');
+
+        TestRunner.assertEqual(
+            document.getElementById('descriptionLabel').textContent,
+            'Kids + Red - Green + Blue - Black - August 15'
+        );
+
+        modal.remove();
+    });
     
     window.renderCalendar = originalRenderCalendar;
     window.showToast = originalShowToast;

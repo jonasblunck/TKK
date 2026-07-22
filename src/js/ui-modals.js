@@ -64,9 +64,10 @@ function openDescriptionModal(dateStr, group) {
     const date = new Date(dateStr);
     const monthName = MONTH_NAMES[date.getMonth()];
     const day = date.getDate();
+    const groupLabel = getMergedGroupLabel(dateStr, group);
     
     document.getElementById('descriptionLabel').textContent = 
-        `${GROUP_LABELS[group]} - ${monthName} ${day}`;
+        `${groupLabel} - ${monthName} ${day}`;
     
     const slotData = getSlotData(dateStr, group);
     document.getElementById('classDescription').value = slotData.description || '';
